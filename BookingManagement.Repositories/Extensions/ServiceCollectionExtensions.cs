@@ -14,19 +14,18 @@ namespace BookingManagement.Repositories.Extensions
         {
             // Đăng ký DbContext
             services.AddDbContext<FptuRoomBookingContext>(options =>
-                options.UseSqlServer(
-                    configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
-            // Đăng ký Unit of Work
-            services.AddScoped<IUnitOfWork, UnitOfWork.UnitOfWork>();
-
-            // Đăng ký các Repository
-            services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IRoomRepository, RoomRepository>();
+            // Đăng ký repositories
             services.AddScoped<IBookingRepository, BookingRepository>();
-            services.AddScoped<ITimeSlotRepository, TimeSlotRepository>();
             services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<IRoleRepository, RoleRepository>();
+            services.AddScoped<IRoomRepository, RoomRepository>();
+            services.AddScoped<ITimeSlotRepository, TimeSlotRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            
+            // Đăng ký Unit of Work
+            services.AddScoped<IUnitOfWork, UnitOfWork.UnitOfWork>();
 
             return services;
         }
