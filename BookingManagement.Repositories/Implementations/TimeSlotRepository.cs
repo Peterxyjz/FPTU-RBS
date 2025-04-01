@@ -18,7 +18,7 @@ namespace BookingManagement.Repositories.Implementations
         public async Task<IEnumerable<TimeSlot>> GetActiveTimeSlotsAsync()
         {
             return await _context.TimeSlots
-                .Where(ts => ts.IsActive)
+                .Where(ts => ts.IsActive == true)
                 .OrderBy(ts => ts.StartTime)
                 .ToListAsync();
         }

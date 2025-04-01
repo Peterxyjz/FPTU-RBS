@@ -1,8 +1,77 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Trang chủ quản trị";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Chào mừng đến với FPTU-RBS</h1>
+    <p>Hệ thống quản lý đặt phòng FPT University</p>
 </div>
+
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Quản lý người dùng</h5>
+                </div>
+                <div class="card-body">
+                    <p>Xem danh sách, thêm, cập nhật, vô hiệu hóa tài khoản người dùng.</p>
+                    <a href="#" class="btn btn-outline-primary">Đi đến</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Quản lý phòng</h5>
+                </div>
+                <div class="card-body">
+                    <p>Thêm, sửa, xóa phòng, phân loại và quản lý trạng thái phòng.</p>
+                    <a href="#" class="btn btn-outline-success">Đi đến</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Quản lý đặt phòng</h5>
+                </div>
+                <div class="card-body">
+                    <p>Xem yêu cầu, phê duyệt/từ chối, thiết lập quy tắc đặt phòng.</p>
+                    <a href="#" class="btn btn-outline-info">Đi đến</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">Quản lý thời gian</h5>
+                </div>
+                <div class="card-body">
+                    <p>Thiết lập giờ hoạt động, lịch đặc biệt và khung giờ đặt phòng.</p>
+                    <a href="#" class="btn btn-outline-warning">Đi đến</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Dashboard</h5>
+                </div>
+                <div class="card-body">
+                    <p>Xem thống kê, báo cáo về tình hình sử dụng phòng và đặt phòng.</p>
+                    <a href="#" class="btn btn-outline-secondary">Đi đến</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info mt-4">
+        <p>Vui lòng <a asp-controller="Account" asp-action="Login">đăng nhập</a> để sử dụng hệ thống quản trị.</p>
+    </div>
+}
