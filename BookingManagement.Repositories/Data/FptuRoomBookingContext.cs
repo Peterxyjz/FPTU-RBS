@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using BookingManagement.Repositories.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using System.IO;
 
 namespace BookingManagement.Repositories.Data;
 
@@ -39,7 +40,12 @@ public partial class FptuRoomBookingContext : DbContext
         return strConn;
     }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer(GetConnectionString());
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            optionsBuilder.UseSqlServer(GetConnectionString());
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
