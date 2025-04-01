@@ -1,10 +1,282 @@
-﻿@page
+@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Trang chủ";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- Banner Section -->
+<div class="container-fluid p-0">
+    <div class="position-relative">
+        <img src="~/images/fptu-campus.jpg" class="img-fluid w-100" style="max-height: 500px; object-fit: cover;" alt="FPT University Campus" />
+        <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background-color: rgba(0, 0, 0, 0.5);">
+            <div class="text-center text-white p-4">
+                <h1 class="display-4 fw-bold">FPTU Room Booking System</h1>
+                <p class="lead">Hệ thống đặt phòng học thông minh dành cho Sinh viên và Giảng viên FPT University</p>
+                @if (!User.Identity.IsAuthenticated)
+                {
+                    <div class="mt-4">
+                        <a asp-page="/Login/Index" class="btn btn-primary me-2">Đăng nhập</a>
+                        <a asp-page="/Register/Index" class="btn btn-outline-light">Đăng ký</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
 </div>
+
+<div class="container mt-5">
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <!-- Phần chức năng chính cho người dùng đã đăng nhập -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h2 class="card-title mb-4">Xin chào, @User.Identity.Name!</h2>
+                        <p class="card-text text-muted">
+                            Chào mừng bạn đến với hệ thống đặt phòng của FPT University. Hệ thống giúp bạn dễ dàng tìm và đặt phòng cho các hoạt động học tập và ngoại khóa.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-5">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-primary rounded-circle p-3 me-3">
+                                <i class="bi bi-calendar-plus text-white fs-4"></i>
+                            </div>
+                            <h3 class="card-title mb-0">Đặt phòng mới</h3>
+                        </div>
+                        <p class="card-text text-muted">
+                            Tìm kiếm và đặt phòng trống cho các hoạt động của bạn theo thời gian thực.
+                            Chọn ngày, khung giờ và loại phòng phù hợp với nhu cầu.
+                        </p>
+                        <a href="#" class="btn btn-primary mt-3">Đặt phòng ngay</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-success rounded-circle p-3 me-3">
+                                <i class="bi bi-list-check text-white fs-4"></i>
+                            </div>
+                            <h3 class="card-title mb-0">Lịch đặt phòng của tôi</h3>
+                        </div>
+                        <p class="card-text text-muted">
+                            Xem danh sách các phòng bạn đã đặt, theo dõi trạng thái phê duyệt,
+                            chỉnh sửa thông tin hoặc hủy đặt phòng nếu cần.
+                        </p>
+                        <a href="#" class="btn btn-success mt-3">Xem lịch của tôi</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-5">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-info rounded-circle p-3 me-3">
+                                <i class="bi bi-building text-white fs-4"></i>
+                            </div>
+                            <h3 class="card-title mb-0">Danh sách phòng</h3>
+                        </div>
+                        <p class="card-text text-muted">
+                            Khám phá tất cả các phòng học, phòng hội thảo, phòng lab có sẵn tại trường.
+                            Xem thông tin chi tiết và thiết bị có trong từng phòng.
+                        </p>
+                        <a href="#" class="btn btn-info mt-3">Xem danh sách</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-warning rounded-circle p-3 me-3">
+                                <i class="bi bi-bell text-white fs-4"></i>
+                            </div>
+                            <h3 class="card-title mb-0">Thông báo</h3>
+                        </div>
+                        <p class="card-text text-muted">
+                            Theo dõi trạng thái đặt phòng, nhận thông báo khi đơn được phê duyệt 
+                            hoặc khi có thay đổi lịch học và sự kiện quan trọng.
+                        </p>
+                        <a href="#" class="btn btn-warning mt-3">Xem thông báo</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-secondary rounded-circle p-3 me-3">
+                                <i class="bi bi-person-circle text-white fs-4"></i>
+                            </div>
+                            <h3 class="card-title mb-0">Tài khoản</h3>
+                        </div>
+                        <p class="card-text text-muted">
+                            Quản lý thông tin cá nhân, cập nhật mật khẩu,
+                            và thiết lập các tùy chọn thông báo cho tài khoản của bạn.
+                        </p>
+                        <a href="#" class="btn btn-secondary mt-3">Cài đặt tài khoản</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Phần giới thiệu cho người dùng chưa đăng nhập -->
+        <div class="row mb-5">
+            <div class="col-md-12 text-center">
+                <h2 class="fw-bold mb-4">Hệ thống đặt phòng thông minh</h2>
+                <p class="lead text-muted">
+                    Nền tảng quản lý và đặt phòng trực tuyến hiện đại giúp sinh viên và giảng viên <br />
+                    dễ dàng tìm và đặt phòng học phù hợp cho mọi hoạt động tại FPT University.
+                </p>
+            </div>
+        </div>
+
+        <div class="row mb-5">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm text-center">
+                    <div class="card-body p-4">
+                        <div class="bg-primary rounded-circle p-3 mx-auto mb-3" style="width: fit-content;">
+                            <i class="bi bi-search text-white fs-4"></i>
+                        </div>
+                        <h3 class="card-title">Tìm kiếm dễ dàng</h3>
+                        <p class="card-text text-muted">
+                            Tìm phòng trống dựa trên thời gian, sức chứa, loại phòng và trang thiết bị 
+                            với giao diện tìm kiếm trực quan, dễ sử dụng.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm text-center">
+                    <div class="card-body p-4">
+                        <div class="bg-success rounded-circle p-3 mx-auto mb-3" style="width: fit-content;">
+                            <i class="bi bi-calendar-check text-white fs-4"></i>
+                        </div>
+                        <h3 class="card-title">Đặt phòng nhanh chóng</h3>
+                        <p class="card-text text-muted">
+                            Quy trình đặt phòng đơn giản, nhanh chóng với xác nhận tức thì 
+                            và hệ thống theo dõi trạng thái đặt phòng thời gian thực.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm text-center">
+                    <div class="card-body p-4">
+                        <div class="bg-info rounded-circle p-3 mx-auto mb-3" style="width: fit-content;">
+                            <i class="bi bi-bell text-white fs-4"></i>
+                        </div>
+                        <h3 class="card-title">Thông báo thông minh</h3>
+                        <p class="card-text text-muted">
+                            Nhận thông báo tự động khi đặt phòng được phê duyệt, thay đổi lịch
+                            hoặc khi có các thông tin quan trọng khác.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-5">
+            <div class="col-md-6 offset-md-3 text-center">
+                <div class="card border-0 shadow-sm bg-primary text-white">
+                    <div class="card-body p-5">
+                        <h3 class="card-title mb-3">Bắt đầu sử dụng ngay hôm nay</h3>
+                        <p class="card-text">
+                            Tạo tài khoản mới hoặc đăng nhập để bắt đầu sử dụng hệ thống đặt phòng FPT University.
+                        </p>
+                        <div class="mt-4">
+                            <a asp-page="/Login/Index" class="btn btn-light me-2">Đăng nhập</a>
+                            <a asp-page="/Register/Index" class="btn btn-outline-light">Đăng ký</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Section: Thống kê -->
+<div class="container-fluid bg-light py-5 mt-4">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-12 text-center">
+                <h2 class="fw-bold">Thống kê sử dụng</h2>
+                <p class="text-muted">Hệ thống đặt phòng đáng tin cậy phục vụ cộng đồng FPT University</p>
+            </div>
+        </div>
+        <div class="row text-center">
+            <div class="col-md-3 mb-4">
+                <div class="card border-0 shadow-sm h-100 py-3">
+                    <div class="card-body">
+                        <h1 class="display-4 fw-bold text-primary">50+</h1>
+                        <p class="text-muted mb-0">Phòng học</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card border-0 shadow-sm h-100 py-3">
+                    <div class="card-body">
+                        <h1 class="display-4 fw-bold text-success">1000+</h1>
+                        <p class="text-muted mb-0">Lượt đặt phòng/tháng</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card border-0 shadow-sm h-100 py-3">
+                    <div class="card-body">
+                        <h1 class="display-4 fw-bold text-info">5000+</h1>
+                        <p class="text-muted mb-0">Người dùng</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card border-0 shadow-sm h-100 py-3">
+                    <div class="card-body">
+                        <h1 class="display-4 fw-bold text-warning">99%</h1>
+                        <p class="text-muted mb-0">Độ hài lòng</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <style>
+        .bg-primary, .btn-primary {
+            background-color: #f27125 !important;
+            border-color: #f27125 !important;
+        }
+        .text-primary {
+            color: #f27125 !important;
+        }
+        .btn-outline-primary {
+            color: #f27125 !important;
+            border-color: #f27125 !important;
+        }
+        .btn-outline-primary:hover {
+            background-color: #f27125 !important;
+            color: white !important;
+        }
+    </style>
+}

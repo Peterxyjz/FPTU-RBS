@@ -1,0 +1,12 @@
+@page
+@model BookingManagement.User.Razor.Pages.Account.AccessDeniedModel
+@{
+    ViewData["Title"] = "Không có quyền truy cập";
+}
+
+<div class="text-center mt-5">
+    <div class="display-1 text-danger">403</div>
+    <h2 class="my-4">Không có quyền truy cập</h2>
+    <p class="lead">Bạn không có quyền truy cập vào trang này.</p>
+    <a asp-page="/Index" class="btn btn-primary mt-3">Quay lại trang chủ</a>
+</div>
