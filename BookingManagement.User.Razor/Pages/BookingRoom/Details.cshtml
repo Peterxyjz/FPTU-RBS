@@ -12,16 +12,28 @@
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Booking.User)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Booking.User.Email)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Booking.Room)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Booking.Room.RoomName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Booking.TimeSlot)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Booking.TimeSlot.TimeSlotId)
+        </dd>
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Booking.BookingDate)
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Booking.BookingDate)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Booking.Status)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Booking.Status)
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Booking.RejectReason)
@@ -42,34 +54,10 @@
             @Html.DisplayFor(model => model.Booking.EndRecurringDate)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Booking.CreatedAt)
+            @Html.DisplayNameFor(model => model.Booking.Status)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Booking.CreatedAt)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Booking.UpdatedAt)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Booking.UpdatedAt)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Booking.Room)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Booking.Room.RoomName)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Booking.TimeSlot)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Booking.TimeSlot.TimeSlotId)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Booking.User)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Booking.User.Email)
+            @Model.GetStatusText(Model.Booking.Status)
         </dd>
     </dl>
 </div>
