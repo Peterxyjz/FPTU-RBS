@@ -32,7 +32,7 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
             {
                 // Handle the case where RoomId is not
                 _logger.LogWarning("không tìm thất id yah");
-                return RedirectToPage("/RoomPage/Index");
+                return RedirectToPage("/RoomList/Index");
             }
 
             // Initialize the Booking model if not already initialized
@@ -48,7 +48,7 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
                 if (!await _bookingService.CheckUserBookingLimitAsync(loggedInUserId))
                 {
                     _logger.LogWarning("chỉ giới hạn được đặt 3 phòng hoi nghe chưa!");
-                    return RedirectToPage("/RoomPage/Index");
+                    return RedirectToPage("/RoomList/Index");
                 }
 
                 Booking.UserId = loggedInUserId;
@@ -91,7 +91,7 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
                 await _bookingService.AddAsync(Booking);
 
                 _logger.LogInformation($"booking thành công!!!");
-                return RedirectToPage("/RoomPage/Index");
+                return RedirectToPage("/RoomList/Index");
             }
             catch (Exception ex)
             {
