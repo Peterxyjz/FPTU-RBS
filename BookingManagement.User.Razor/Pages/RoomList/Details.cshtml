@@ -40,16 +40,23 @@
                 @Html.DisplayFor(model => model.Room.Description)
             </dd>
             <dt class="col-sm-3">
-                Room Image
+                Hình ảnh
             </dt>
             <dd class="col-sm-9">
-                <img src="@Model.GetDirectImageUrl(Model.Room.ImageUrl)" alt="Room Image" class="room-image" style="max-width: 400px; max-height: 300px;" />
+                @if (!string.IsNullOrEmpty(Model.Room.ImageUrl))
+                {
+                    <img src="@Model.GetDirectImageUrl(Model.Room.ImageUrl)" alt="Room Image" class="room-image" style="max-width: 400px; max-height: 300px;" />
+                }
+                else
+                {
+                    <div class="no-image">No image available</div>
+                }
             </dd>
             <dt class="col-sm-3">
                 @Html.DisplayNameFor(model => model.Room.Status)
             </dt>
             <dd class="col-sm-9">
-                @Html.DisplayFor(model => model.Room.Status)
+                @Model.GetStatusText(Model.Room.Status)
             </dd>
         </dl>
     </div>

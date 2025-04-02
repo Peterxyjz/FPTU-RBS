@@ -59,5 +59,17 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
 
             return RedirectToPage("./Index");
         }
+
+        public string GetStatusText(int status)
+        {
+            return status switch
+            {
+                1 => "Chờ duyệt",
+                2 => "Đã duyệt",
+                3 => "Từ chối",
+                4 => "Đã hủy",
+                _ => status.ToString()
+            };
+        }
     }
 }

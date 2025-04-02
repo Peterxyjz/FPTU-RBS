@@ -28,5 +28,17 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
                 .Include(b => b.TimeSlot)
                 .Include(b => b.User).ToListAsync();
         }
+
+        public string GetStatusText(int status)
+        {
+            return status switch
+            {
+                1 => "Chờ duyệt",
+                2 => "Đã duyệt",
+                3 => "Từ chối",
+                4 => "Đã hủy",
+                _ => status.ToString()
+            };
+        }
     }
 }

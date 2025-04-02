@@ -5,19 +5,22 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Lịch của tôi</h1>
 
-<p>
-    <a asp-page="Create">Create New</a>
-</p>
 <table class="table">
     <thead>
-        <tr>
+        <tr class="text-center">
             <th>
-                @Html.DisplayNameFor(model => model.Booking[0].BookingDate)
+                @Html.DisplayNameFor(model => model.Booking[0].User)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Booking[0].Status)
+                @Html.DisplayNameFor(model => model.Booking[0].Room)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Booking[0].TimeSlot)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Booking[0].BookingDate)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Booking[0].RejectReason)
@@ -29,46 +32,16 @@
                 @Html.DisplayNameFor(model => model.Booking[0].EndRecurringDate)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Booking[0].CreatedAt)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Booking[0].UpdatedAt)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Booking[0].Room)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Booking[0].TimeSlot)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Booking[0].User)
+                @Html.DisplayNameFor(model => model.Booking[0].Status)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
 @foreach (var item in Model.Booking) {
-        <tr>
+            <tr class="text-center">
             <td>
-                @Html.DisplayFor(modelItem => item.BookingDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Status)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.RejectReason)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsRecurring)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.EndRecurringDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UpdatedAt)
+                    @Html.DisplayFor(modelItem => item.User.Email)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Room.RoomName)
@@ -77,7 +50,19 @@
                 @Html.DisplayFor(modelItem => item.TimeSlot.TimeSlotId)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.User.Email)
+                    @Html.DisplayFor(modelItem => item.BookingDate)
+            </td>
+            <td>
+                    @Html.DisplayFor(modelItem => item.RejectReason)
+            </td>
+            <td>
+                    @Html.DisplayFor(modelItem => item.IsRecurring)
+            </td>
+            <td>
+                    @Html.DisplayFor(modelItem => item.EndRecurringDate)
+            </td>
+            <td>
+                @Model.GetStatusText(item.Status)
             </td>
             <td>
                 <a asp-page="./Edit" asp-route-id="@item.BookingId">Edit</a> |

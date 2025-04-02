@@ -41,6 +41,19 @@
         transform: scale(1.02);
     }
 
+.no-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 400px;
+    height: 200px;
+    background-color: #f0f0f0;
+    border: 1px dashed #ccc;
+    color: #777;
+    font-style: italic;
+    border-radius: 6px;
+}
+
 .action-buttons {
     margin-top: 25px;
     display: flex;
