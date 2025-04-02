@@ -1,0 +1,80 @@
+﻿@page
+@model BookingManagement.User.Razor.Pages.RoomPage.EditModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Room</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Room.RoomId" />
+            <div class="form-group">
+                <label asp-for="Room.RoomName" class="control-label"></label>
+                <input asp-for="Room.RoomName" class="form-control" />
+                <span asp-validation-for="Room.RoomName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Room.Capacity" class="control-label"></label>
+                <input asp-for="Room.Capacity" class="form-control" />
+                <span asp-validation-for="Room.Capacity" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Room.RoomType" class="control-label"></label>
+                <input asp-for="Room.RoomType" class="form-control" />
+                <span asp-validation-for="Room.RoomType" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Room.Building" class="control-label"></label>
+                <input asp-for="Room.Building" class="form-control" />
+                <span asp-validation-for="Room.Building" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Room.Description" class="control-label"></label>
+                <input asp-for="Room.Description" class="form-control" />
+                <span asp-validation-for="Room.Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Room.ImageUrl" class="control-label"></label>
+                <input asp-for="Room.ImageUrl" class="form-control" />
+                <span asp-validation-for="Room.ImageUrl" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Room.Status" class="control-label"></label>
+                <input asp-for="Room.Status" class="form-control" />
+                <span asp-validation-for="Room.Status" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Room.IsActive" class="control-label"></label>
+                <input asp-for="Room.IsActive" class="form-control" />
+                <span asp-validation-for="Room.IsActive" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Room.CreatedAt" class="control-label"></label>
+                <input asp-for="Room.CreatedAt" class="form-control" />
+                <span asp-validation-for="Room.CreatedAt" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Room.UpdatedAt" class="control-label"></label>
+                <input asp-for="Room.UpdatedAt" class="form-control" />
+                <span asp-validation-for="Room.UpdatedAt" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
