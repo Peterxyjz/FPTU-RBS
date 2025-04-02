@@ -1,4 +1,5 @@
 using BookingManagement.Repositories.Extensions;
+using BookingManagement.Repositories.Interfaces;
 using BookingManagement.Services.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 

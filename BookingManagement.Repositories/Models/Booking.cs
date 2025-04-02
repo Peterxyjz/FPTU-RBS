@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace BookingManagement.Repositories.Models;
 
@@ -11,6 +12,7 @@ public partial class Booking
 
     public int RoomId { get; set; }
 
+    [Required(ErrorMessage = "Booking date is required.")]
     public DateOnly BookingDate { get; set; }
 
     public int TimeSlotId { get; set; }
