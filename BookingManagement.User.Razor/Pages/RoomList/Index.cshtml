@@ -106,7 +106,7 @@
                     }
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Status)
+                    @Model.GetStatusText(item.Status)
                 </td>
                 <td>
                     <a asp-page="./Details" asp-route-id="@item.RoomId">Details</a>

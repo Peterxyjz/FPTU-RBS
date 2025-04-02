@@ -56,7 +56,7 @@
                 @Html.DisplayNameFor(model => model.Room.Status)
             </dt>
             <dd class="col-sm-9">
-                @Html.DisplayFor(model => model.Room.Status)
+                @Model.GetStatusText(Model.Room.Status)
             </dd>
         </dl>
     </div>
