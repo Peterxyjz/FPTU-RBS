@@ -1,0 +1,90 @@
+﻿@page
+@model BookingManagement.User.Razor.Pages.BookingRoom.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Booking[0].BookingDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Booking[0].Status)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Booking[0].RejectReason)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Booking[0].IsRecurring)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Booking[0].EndRecurringDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Booking[0].CreatedAt)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Booking[0].UpdatedAt)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Booking[0].Room)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Booking[0].TimeSlot)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Booking[0].User)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Booking) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.BookingDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Status)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RejectReason)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsRecurring)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.EndRecurringDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreatedAt)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.UpdatedAt)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Room.RoomName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TimeSlot.TimeSlotId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.User.Email)
+            </td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.BookingId">Edit</a> |
+                <a asp-page="./Details" asp-route-id="@item.BookingId">Details</a> |
+                <a asp-page="./Delete" asp-route-id="@item.BookingId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

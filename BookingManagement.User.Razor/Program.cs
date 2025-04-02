@@ -1,4 +1,5 @@
 using BookingManagement.Repositories.Extensions;
+using BookingManagement.Services.Interfaces;
 using BookingManagement.Services.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
@@ -12,6 +13,8 @@ builder.Services.AddRepositories(builder.Configuration);
 
 // Đăng ký các services
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<ITimeSlotService, TimeSlotService>();
 
 // Cấu hình Authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
