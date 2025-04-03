@@ -56,7 +56,8 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
 
             if (booking.Status != 1)
             {
-                _logger.LogWarning("chỉ được cập nhậy khi trong trạng thái chờ xử lý");
+                _logger.LogWarning("chỉ được cập nhật khi trong trạng thái chờ xử lý");
+                TempData["message"] = "chỉ được cập nhật khi trong trạng thái chờ xử lý!";
                 return RedirectToPage("/BookingRoom/Index");
             }
 

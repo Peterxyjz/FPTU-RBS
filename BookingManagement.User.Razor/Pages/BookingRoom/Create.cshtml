@@ -24,23 +24,13 @@
             </div>
             <div class="form-group">
                 <label asp-for="Booking.BookingDate" class="control-label"></label>
-                <input asp-for="Booking.BookingDate" class="form-control" type="date" />
+                <input asp-for="Booking.BookingDate" class="form-control" type="date" id="bookingDate" />
                 <span asp-validation-for="Booking.BookingDate" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Booking.TimeSlotId" class="control-label"></label>
-                <select asp-for="Booking.TimeSlotId" class ="form-control" asp-items="ViewBag.TimeSlotId"></select>
+                <select asp-for="Booking.TimeSlotId" class="form-control" id="timeSlotId" asp-items="ViewBag.TimeSlotId"></select>
             </div>
-            @* <div class="form-group"> *@
-            @*     <label asp-for="Booking.RejectReason" class="control-label"></label> *@
-            @*     <input asp-for="Booking.RejectReason" class="form-control" /> *@
-            @*     <span asp-validation-for="Booking.RejectReason" class="text-danger"></span> *@
-            @* </div> *@
-            @* <div class="form-group"> *@
-            @*     <label asp-for="Booking.EndRecurringDate" class="control-label"></label> *@
-            @*     <input asp-for="Booking.EndRecurringDate" class="form-control" /> *@
-            @*     <span asp-validation-for="Booking.EndRecurringDate" class="text-danger"></span> *@
-            @* </div> *@
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
@@ -53,5 +43,47 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        document.getElementById("bookingDate").addEventListener("change", function () {
+            var bookingDate = this.value;
+            var roomId = @Model.Booking.RoomId;
+
+            // Kiểm tra xem bookingDate có giá trị không
+            if (!bookingDate) {
+                console.error("Booking date is empty.");
+                return;
+            }
+
+            // Gửi yêu cầu AJAX với handler
+            fetch(`/BookingRoom/Create?handler=AvailableTimeSlots&roomId=${roomId}&bookingDate=${bookingDate}`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    var timeSlotSelect = document.getElementById("timeSlotId");
+                    timeSlotSelect.innerHTML = ""; // Xóa các option cũ
+
+                    // Thêm các option mới
+                    data.forEach(slot => {
+                        var option = document.createElement("option");
+                        option.value = slot.timeSlotId;
+                        option.text = slot.displayText;
+                        timeSlotSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error("Error loading time slots:", error));
+        });
+    </script>
 }

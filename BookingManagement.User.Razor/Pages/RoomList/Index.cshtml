@@ -4,6 +4,13 @@
     ViewData["Title"] = "Danh sách phòng";
 }
 
+@if ((TempData["message"] != null))
+{
+    <div class="alert alert-danger text-center">
+        @TempData["message"]
+    </div>
+}
+
 <h1>Danh sách phòng</h1>
 
 <div class="row mb-4">

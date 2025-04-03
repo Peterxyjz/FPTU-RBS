@@ -40,8 +40,8 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
         {
             if (id == null)
             {
-                // Handle the case where RoomId is not
-                _logger.LogWarning("không tìm thất id yah");
+                _logger.LogWarning("không tìm thấy id yah");
+                TempData["message"] = "không tìm thấy id yah!";
                 return RedirectToPage("/BookingRoom/Index");
             }
 
@@ -49,12 +49,14 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
 
             if (booking == null)
             {
-                _logger.LogWarning("không tìm thất booking yah");
+                _logger.LogWarning("không tìm thấy booking yah");
+                TempData["message"] = "không tìm thấy booking yah!";
                 return RedirectToPage("/BookingRoom/Index");
             }
-            if(booking.Status != 1)
+            if (booking.Status != 1)
             {
-                _logger.LogWarning("chỉ được cập nhậy khi trong trạng thái chờ xử lý");
+                _logger.LogWarning("chỉ được cập nhật khi trong trạng thái chờ xử lý");
+                TempData["message"] = "chỉ được cập nhật khi trong trạng thái chờ xử lý!";
                 return RedirectToPage("/BookingRoom/Index");
             }
 
@@ -69,16 +71,60 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
             else
             {
                 _logger.LogWarning("User chưa loggin");
+                TempData["message"] = "User chưa loggin!";
                 return RedirectToPage("/Login/Index");
             }
-            var list = await _timeSlotService.GetActiveTimeSlotsAsync();
+
+            // Lấy danh sách tất cả time slot
+            var allTimeSlots = await _timeSlotService.GetActiveTimeSlotsAsync();
+
+            // Lấy danh sách TimeSlotId đã được đặt cho phòng và ngày (trừ booking hiện tại)
+            var bookedTimeSlotIds = await _bookingService.GetBookedTimeSlotIdsAsync(Booking.RoomId, Booking.BookingDate);
+
+            // Lọc các time slot chưa được đặt, nhưng giữ lại time slot của booking hiện tại
+            var availableTimeSlots = allTimeSlots
+                .Where(ts => !bookedTimeSlotIds.Contains(ts.TimeSlotId) || ts.TimeSlotId == Booking.TimeSlotId)
+                .ToList();
+
+            // Populate dropdown với các time slot chưa được đặt
             ViewData["TimeSlotId"] = new SelectList(
-                list,
+                availableTimeSlots,
                 "TimeSlotId",
-                "DisplayText"
+                "DisplayText",
+                Booking.TimeSlotId // Đặt giá trị mặc định là TimeSlotId của booking hiện tại
             );
 
             return Page();
+        }
+
+        public async Task<IActionResult> OnGetAvailableTimeSlotsAsync(int roomId, string bookingDate, int bookingId)
+        {
+            _logger.LogInformation($"OnGetAvailableTimeSlotsAsync called with roomId: {roomId}, bookingDate: {bookingDate}, bookingId: {bookingId}");
+
+            // Chuyển đổi bookingDate từ string sang DateOnly
+            if (string.IsNullOrEmpty(bookingDate) || !DateOnly.TryParse(bookingDate, out var parsedBookingDate))
+            {
+                _logger.LogWarning($"Invalid booking date format: {bookingDate}");
+                return BadRequest(new { error = "Invalid booking date format. Please select a valid date." });
+            }
+
+            // Lấy danh sách tất cả time slot
+            var allTimeSlots = await _timeSlotService.GetActiveTimeSlotsAsync();
+
+            // Lấy danh sách TimeSlotId đã được đặt
+            var bookedTimeSlotIds = await _bookingService.GetBookedTimeSlotIdsAsync(roomId, parsedBookingDate);
+
+            // Lấy thông tin booking hiện tại để giữ time slot của nó
+            var currentBooking = await _bookingService.GetByIdAsync(bookingId);
+            int? currentTimeSlotId = currentBooking?.TimeSlotId;
+
+            // Lọc các time slot chưa được đặt, nhưng giữ lại time slot của booking hiện tại
+            var availableTimeSlots = allTimeSlots
+                .Where(ts => !bookedTimeSlotIds.Contains(ts.TimeSlotId) || ts.TimeSlotId == currentTimeSlotId)
+                .Select(ts => new { ts.TimeSlotId, ts.DisplayText })
+                .ToList();
+
+            return new JsonResult(availableTimeSlots);
         }
 
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -93,26 +139,34 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
                 existingBooking.RoomId = Booking.RoomId;
                 existingBooking.BookingDate = Booking.BookingDate;
                 existingBooking.TimeSlotId = Booking.TimeSlotId;
-                existingBooking.RejectReason = Booking.RejectReason;
-                existingBooking.IsRecurring = Booking.IsRecurring;
-                existingBooking.EndRecurringDate = Booking.EndRecurringDate;
 
                 await _bookingService.UpdateAsync(existingBooking);
 
                 _logger.LogInformation($"edit booking thành công!!!");
+                TempData["messageSC"] = "edit booking thành công!!!";
                 return RedirectToPage("/BookingRoom/Index");
             }
             catch (Exception ex)
             {
-                // Log the exception (you can use a logging framework like Serilog or ILogger)
                 ModelState.AddModelError(string.Empty, ex.Message);
 
-                // Repopulate the dropdown and UserName for the view
-                var list = await _timeSlotService.GetActiveTimeSlotsAsync();
+                // Lấy danh sách tất cả time slot
+                var allTimeSlots = await _timeSlotService.GetActiveTimeSlotsAsync();
+
+                // Lấy danh sách TimeSlotId đã được đặt cho phòng và ngày
+                var bookedTimeSlotIds = await _bookingService.GetBookedTimeSlotIdsAsync(Booking.RoomId, Booking.BookingDate);
+
+                // Lọc các time slot chưa được đặt, nhưng giữ lại time slot của booking hiện tại
+                var availableTimeSlots = allTimeSlots
+                    .Where(ts => !bookedTimeSlotIds.Contains(ts.TimeSlotId) || ts.TimeSlotId == Booking.TimeSlotId)
+                    .ToList();
+
+                // Populate dropdown với các time slot chưa được đặt
                 ViewData["TimeSlotId"] = new SelectList(
-                    list,
+                    availableTimeSlots,
                     "TimeSlotId",
-                    "DisplayText"
+                    "DisplayText",
+                    Booking.TimeSlotId
                 );
 
                 // Repopulate UserName for the view

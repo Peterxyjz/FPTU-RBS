@@ -8,6 +8,7 @@ namespace BookingManagement.Services.Interfaces
         Task<bool> CheckUserBookingLimitAsync(int userId);
         Task DeleteAsync(int id);
         Task<IEnumerable<Booking>> GetAllAsync();
+        Task<List<int>> GetBookedTimeSlotIdsAsync(int roomId, DateOnly bookingDate);
         Task<Booking?> GetByIdAsync(int id);
         Task UpdateAsync(Booking booking);
     }
