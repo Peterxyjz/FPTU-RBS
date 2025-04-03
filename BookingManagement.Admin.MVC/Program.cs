@@ -1,5 +1,6 @@
 using BookingManagement.Repositories.Extensions;
 using BookingManagement.Repositories.Interfaces;
+using BookingManagement.Services.Interfaces;
 using BookingManagement.Services.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
@@ -12,7 +13,12 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddRepositories(builder.Configuration);
 
 // Đăng ký các services
-builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<BookingManagement.Services.Interfaces.IAuthService, BookingManagement.Services.Services.AuthService>();
+builder.Services.AddScoped<BookingManagement.Services.Interfaces.IUserService, BookingManagement.Services.Services.UserService>();
+builder.Services.AddScoped<BookingManagement.Services.Interfaces.IRoomService, BookingManagement.Services.Services.RoomService>();
+
+// Đăng ký SignalR
+builder.Services.AddSignalR();
 
 // Cấu hình Authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -20,9 +26,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     {
         options.Cookie.HttpOnly = true;
         options.ExpireTimeSpan = TimeSpan.FromDays(7);
-        options.LoginPath = "/Account/Login";
-        options.LogoutPath = "/Account/Logout";
-        options.AccessDeniedPath = "/Account/AccessDenied";
+        options.LoginPath = "/Login";
+        options.LogoutPath = "/Login/Logout";
+        options.AccessDeniedPath = "/Login/AccessDenied";
         options.SlidingExpiration = true;
     });
 
@@ -30,15 +36,16 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+    options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
 });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -52,6 +59,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Login}/{action=Index}/{id?}");
 
 app.Run();

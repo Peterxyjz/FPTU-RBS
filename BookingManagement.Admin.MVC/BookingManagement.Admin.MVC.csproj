@@ -10,4 +10,8 @@
     <ProjectReference Include="..\BookingManagement.Services\BookingManagement.Services.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Hubs\" />
+  </ItemGroup>
+
 </Project>

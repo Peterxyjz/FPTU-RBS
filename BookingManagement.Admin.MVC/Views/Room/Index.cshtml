@@ -1,0 +1,312 @@
+@model IEnumerable<BookingManagement.Repositories.Models.Room>
+
+@{
+    ViewData["Title"] = "Quản lý phòng";
+    var statuses = BookingManagement.Services.Extensions.RoomExtensions.GetRoomStatusList();
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Quản lý phòng</h1>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i> Thêm phòng mới
+    </a>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-primary">Danh sách phòng</h6>
+        <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+            <i class="bi bi-funnel me-1"></i> Bộ lọc
+        </button>
+    </div>
+    <div class="collapse" id="filterCollapse">
+        <div class="card-body bg-light border-bottom">
+            <form asp-action="Filter" method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Tòa nhà</label>
+                    <select name="building" class="form-select">
+                        <option value="">-- Tất cả --</option>
+                        @foreach (var building in ViewBag.Buildings ?? new SelectList(new List<string>()))
+                        {
+                            <option value="@building.Text" selected="@(ViewBag.CurrentBuilding == building.Text)">@building.Text</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Loại phòng</label>
+                    <select name="roomType" class="form-select">
+                        <option value="">-- Tất cả --</option>
+                        @foreach (var roomType in ViewBag.RoomTypes ?? new SelectList(new List<string>()))
+                        {
+                            <option value="@roomType.Text" selected="@(ViewBag.CurrentRoomType == roomType.Text)">@roomType.Text</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Trạng thái</label>
+                    <select name="status" class="form-select">
+                        <option value="">-- Tất cả --</option>
+                        @foreach (var status in statuses)
+                        {
+                            <option value="@status.Key" selected="@(ViewBag.CurrentStatus == status.Key)">@status.Value</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="bi bi-search me-1"></i> Lọc
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle me-1"></i> Xóa bộ lọc
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover" id="roomsTable" width="100%" cellspacing="0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên phòng</th>
+                        <th>Sức chứa</th>
+                        <th>Loại phòng</th>
+                        <th>Tòa nhà</th>
+                        <th>Hình ảnh</th>
+                        <th>Trạng thái</th>
+                        <th width="150">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var statusName = BookingManagement.Services.Extensions.RoomExtensions.GetRoomStatusName(item.Status);
+                        var statusBadgeClass = item.Status switch
+                        {
+                            1 => "bg-success",
+                            2 => "bg-warning text-dark",
+                            3 => "bg-danger",
+                            _ => "bg-secondary"
+                        };
+
+                        <tr>
+                            <td>@item.RoomId</td>
+                            <td>@item.RoomName</td>
+                            <td>@item.Capacity</td>
+                            <td>@item.RoomType</td>
+                            <td>@item.Building</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                {
+                                    <img src="@item.ImageUrl" alt="@item.RoomName" class="img-thumbnail" style="max-height: 50px; max-width: 50px;" />
+                                }
+                                else
+                                {
+                                    <span class="text-muted"><i class="bi bi-image"></i></span>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge @statusBadgeClass">@statusName</span>
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+                                        <i class="bi bi-gear"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><a class="dropdown-item" asp-action="Details" asp-route-id="@item.RoomId"><i class="bi bi-info-circle me-2"></i>Chi tiết</a></li>
+                                        <li><a class="dropdown-item" asp-action="Edit" asp-route-id="@item.RoomId"><i class="bi bi-pencil-square me-2"></i>Chỉnh sửa</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        @if (item.Status != 1)
+                                        {
+                                            <li><button class="dropdown-item text-success status-action" data-room-id="@item.RoomId" data-status="1"><i class="bi bi-check-circle me-2"></i>Đánh dấu hoạt động</button></li>
+                                        }
+                                        @if (item.Status != 2)
+                                        {
+                                            <li><button class="dropdown-item text-warning status-action" data-room-id="@item.RoomId" data-status="2"><i class="bi bi-tools me-2"></i>Đánh dấu bảo trì</button></li>
+                                        }
+                                        @if (item.Status != 3)
+                                        {
+                                            <li><button class="dropdown-item text-danger status-action" data-room-id="@item.RoomId" data-status="3"><i class="bi bi-x-circle me-2"></i>Đánh dấu không sử dụng</button></li>
+                                        }
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item text-danger" asp-action="Delete" asp-route-id="@item.RoomId"><i class="bi bi-trash me-2"></i>Xóa</a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+    <script>
+        // Lưu trữ DataTable để sử dụng trong các hàm xử lý cập nhật
+        let roomsTable;
+        
+        $(document).ready(function () {
+            // Khởi tạo DataTable
+            roomsTable = $('#roomsTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json'
+                },
+                "order": [[0, "desc"]]
+            });
+
+            // Xử lý cập nhật trạng thái
+            $('.status-action').on('click', function () {
+                const roomId = $(this).data('room-id');
+                const status = $(this).data('status');
+                const statusText = status === 1 ? 'hoạt động' : status === 2 ? 'bảo trì' : 'không sử dụng';
+
+                if (confirm(`Bạn có chắc chắn muốn đánh dấu phòng #${roomId} là ${statusText}?`)) {
+                    $.ajax({
+                        url: '@Url.Action("UpdateStatus")/' + roomId,
+                        type: 'POST',
+                        data: { status: status },
+                        success: function (result) {
+                            if (result.success) {
+                                // Không cần reload, SignalR sẽ cập nhật trạng thái
+                                alert(result.message);
+                            } else {
+                                alert('Có lỗi xảy ra: ' + result.message);
+                            }
+                        },
+                        error: function () {
+                            alert('Đã xảy ra lỗi khi cập nhật trạng thái phòng.');
+                        }
+                    });
+                }
+            });
+
+            // Kết nối SignalR
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl('/roomHub')
+                .withAutomaticReconnect()
+                .build();
+
+            // Xử lý khi nhận thông báo phòng được cập nhật
+            connection.on('ReceiveRoomUpdated', function (room) {
+                updateRoomInTable(room);
+            });
+
+            // Xử lý khi nhận thông báo phòng bị xóa
+            connection.on('ReceiveRoomDeleted', function (roomId) {
+                removeRoomFromTable(roomId);
+            });
+
+            // Xử lý khi nhận thông báo phòng mới được tạo
+            connection.on('ReceiveRoomCreated', function (room) {
+                addRoomToTable(room);
+            });
+
+            // Xử lý khi nhận thông báo thay đổi trạng thái phòng
+            connection.on('ReceiveRoomStatusChanged', function (roomId, newStatus) {
+                updateRoomStatus(roomId, newStatus);
+            });
+
+            // Bắt đầu kết nối
+            connection.start().catch(function (err) {
+                console.error(err.toString());
+            });
+        });
+
+        // Hàm cập nhật phòng trong bảng
+        function updateRoomInTable(room) {
+            // Tìm dòng của phòng trong bảng
+            const rows = roomsTable.rows().nodes();
+            let found = false;
+            
+            $(rows).each(function (index, row) {
+                const rowData = roomsTable.row(row).data();
+                if (rowData[0] == room.roomId) {
+                    // Cập nhật dữ liệu dòng
+                    rowData[1] = room.roomName;
+                    rowData[2] = room.capacity;
+                    rowData[3] = room.roomType;
+                    rowData[4] = room.building || '';
+                    
+                    // Cập nhật hình ảnh nếu có
+                    if (room.imageUrl) {
+                        rowData[5] = `<img src="${room.imageUrl}" alt="${room.roomName}" class="img-thumbnail" style="max-height: 50px; max-width: 50px;" />`;
+                    } else {
+                        rowData[5] = `<span class="text-muted"><i class="bi bi-image"></i></span>`;
+                    }
+                    
+                    // Cập nhật trạng thái
+                    updateRoomStatus(room.roomId, room.status);
+                    
+                    roomsTable.row(row).data(rowData).draw(false);
+                    found = true;
+                    return false; // Break the loop
+                }
+            });
+            
+            // Nếu không tìm thấy, thêm mới
+            if (!found) {
+                addRoomToTable(room);
+            }
+        }
+
+        // Hàm xóa phòng khỏi bảng
+        function removeRoomFromTable(roomId) {
+            const rows = roomsTable.rows().nodes();
+            
+            $(rows).each(function (index, row) {
+                const rowData = roomsTable.row(row).data();
+                if (rowData[0] == roomId) {
+                    roomsTable.row(row).remove().draw(false);
+                    return false; // Break the loop
+                }
+            });
+        }
+
+        // Hàm thêm phòng mới vào bảng
+        function addRoomToTable(room) {
+            // Tạo một dòng mới
+            // Để đơn giản, mở lại trang để cập nhật đầy đủ giao diện
+            location.reload();
+        }
+
+        // Hàm cập nhật trạng thái của phòng
+        function updateRoomStatus(roomId, newStatus) {
+            const rows = roomsTable.rows().nodes();
+            
+            $(rows).each(function (index, row) {
+                const rowData = roomsTable.row(row).data();
+                if (rowData[0] == roomId) {
+                    // Lấy thông tin trạng thái
+                    let statusName, statusClass;
+                    
+                    switch (newStatus) {
+                        case 1:
+                            statusName = 'Hoạt động';
+                            statusClass = 'bg-success';
+                            break;
+                        case 2:
+                            statusName = 'Bảo trì';
+                            statusClass = 'bg-warning text-dark';
+                            break;
+                        case 3:
+                            statusName = 'Không sử dụng';
+                            statusClass = 'bg-danger';
+                            break;
+                        default:
+                            statusName = 'Không xác định';
+                            statusClass = 'bg-secondary';
+                    }
+                    
+                    rowData[6] = `<span class="badge ${statusClass}">${statusName}</span>`;
+                    roomsTable.row(row).data(rowData).draw(false);
+                    
+                    return false; // Break the loop
+                }
+            });
+        }
+    </script>
+}
