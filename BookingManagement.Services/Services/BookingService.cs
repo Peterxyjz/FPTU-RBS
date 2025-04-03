@@ -25,6 +25,11 @@ namespace BookingManagement.Services.Services
             return await _unitOfWork.Bookings.GetAllAsync();
         }
 
+        public async Task<IEnumerable<Booking>> GetBookingsByUserIdAsync(int userId)
+        {
+            return await _unitOfWork.Bookings.GetBookingsByUserIdAsync(userId);
+        }
+
         public async Task<Booking?> GetByIdAsync(int id)
         {
             return await _unitOfWork.Bookings.GetByIdAsync(id);
