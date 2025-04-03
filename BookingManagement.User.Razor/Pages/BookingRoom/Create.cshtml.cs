@@ -121,8 +121,13 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
                 await _bookingService.AddAsync(Booking);
 
                 _logger.LogInformation($"booking thành công!!!");
+<<<<<<< HEAD
+                TempData["SuccessMessage"] = "Đặt phòng thành công! Bạn có một thông báo mới.";
+                return RedirectToPage("/RoomList/Index");
+=======
                 TempData["messageSC"] = "booking thành công!!!";
                 return RedirectToPage("./Index");
+>>>>>>> c40759e1e001e673473102694972f18250a02af1
             }
             catch (Exception ex)
             {
