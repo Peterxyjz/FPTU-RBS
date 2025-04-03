@@ -8,17 +8,21 @@ using Microsoft.EntityFrameworkCore;
 using BookingManagement.Repositories.Data;
 using BookingManagement.Repositories.Models;
 using Microsoft.AspNetCore.Authorization;
+using BookingManagement.Services.Interfaces;
 
 namespace BookingManagement.User.Razor.Pages.BookingRoom
 {
     [Authorize]
     public class IndexModel : PageModel
     {
+        private readonly IRoomService _roomService;
+
         private readonly BookingManagement.Repositories.Data.FptuRoomBookingContext _context;
 
-        public IndexModel(BookingManagement.Repositories.Data.FptuRoomBookingContext context)
+        public IndexModel(BookingManagement.Repositories.Data.FptuRoomBookingContext context, IRoomService roomService)
         {
             _context = context;
+            _roomService = roomService;
         }
 
         public IList<Booking> Booking { get;set; } = default!;
@@ -33,14 +37,7 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
 
         public string GetStatusText(int status)
         {
-            return status switch
-            {
-                1 => "Chờ duyệt",
-                2 => "Đã duyệt",
-                3 => "Từ chối",
-                4 => "Đã hủy",
-                _ => status.ToString()
-            };
+            return _roomService.GetStatusText(status);
         }
     }
 }

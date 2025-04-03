@@ -10,6 +10,19 @@
     <div class="room-details">
         <dl class="row">
             <dt class="col-sm-3">
+                Hình ảnh
+            </dt>
+            <dd class="col-sm-9">
+                @if (!string.IsNullOrEmpty(Model.Room.ImageUrl))
+                {
+                    <img src="@Model.GetDirectImageUrl(Model.Room.ImageUrl)" alt="Room Image" class="room-image" style="max-width: 400px; max-height: 300px; margin: 0 0 0 0;" />
+                }
+                else
+                {
+                    <div class="no-image">No image available</div>
+                }
+            </dd>
+            <dt class="col-sm-3">
                 @Html.DisplayNameFor(model => model.Room.RoomName)
             </dt>
             <dd class="col-sm-9">
@@ -38,19 +51,6 @@
             </dt>
             <dd class="col-sm-9 room-description">
                 @Html.DisplayFor(model => model.Room.Description)
-            </dd>
-            <dt class="col-sm-3">
-                Hình ảnh
-            </dt>
-            <dd class="col-sm-9">
-                @if (!string.IsNullOrEmpty(Model.Room.ImageUrl))
-                {
-                    <img src="@Model.GetDirectImageUrl(Model.Room.ImageUrl)" alt="Room Image" class="room-image" style="max-width: 400px; max-height: 300px;" />
-                }
-                else
-                {
-                    <div class="no-image">No image available</div>
-                }
             </dd>
             <dt class="col-sm-3">
                 @Html.DisplayNameFor(model => model.Room.Status)

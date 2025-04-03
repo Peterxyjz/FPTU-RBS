@@ -159,7 +159,23 @@ namespace BookingManagement.Services.Services
         {
             try
             {
-                await _unitOfWork.Bookings.DeleteAsync(id);
+                // Get the booking by ID
+                var booking = await _unitOfWork.Bookings.GetByIdAsync(id);
+
+                if (booking == null)
+                {
+                    throw new InvalidOperationException("Booking not found.");
+                }
+
+                // Only allow cancellation of pending bookings (status = 1)
+                if (booking.Status != 1)
+                {
+                    throw new InvalidOperationException("Only pending bookings can be cancelled.");
+                }
+
+                // Update status to 4 (cancelled) instead of deleting
+                booking.Status = 4;
+                await _unitOfWork.Bookings.UpdateAsync(booking);
                 await _unitOfWork.CompleteAsync();
             }
             catch (Exception)
