@@ -7,9 +7,14 @@
 
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">Quản lý phòng</h1>
-    <a asp-action="Create" class="btn btn-primary">
-        <i class="bi bi-plus-circle me-1"></i> Thêm phòng mới
-    </a>
+    <div>
+        <a asp-action="Archived" class="btn btn-outline-secondary me-2">
+            <i class="bi bi-archive me-1"></i> Phòng đã lưu trữ
+        </a>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Thêm phòng mới
+        </a>
+    </div>
 </div>
 
 <div class="card shadow mb-4">
@@ -86,7 +91,6 @@
                         {
                             1 => "bg-success",
                             2 => "bg-warning text-dark",
-                            3 => "bg-danger",
                             _ => "bg-secondary"
                         };
 
@@ -125,10 +129,6 @@
                                         @if (item.Status != 2)
                                         {
                                             <li><button class="dropdown-item text-warning status-action" data-room-id="@item.RoomId" data-status="2"><i class="bi bi-tools me-2"></i>Đánh dấu bảo trì</button></li>
-                                        }
-                                        @if (item.Status != 3)
-                                        {
-                                            <li><button class="dropdown-item text-danger status-action" data-room-id="@item.RoomId" data-status="3"><i class="bi bi-x-circle me-2"></i>Đánh dấu không sử dụng</button></li>
                                         }
                                         <li><hr class="dropdown-divider"></li>
                                         <li><a class="dropdown-item text-danger" asp-action="Delete" asp-route-id="@item.RoomId"><i class="bi bi-trash me-2"></i>Xóa</a></li>
@@ -291,10 +291,6 @@
                         case 2:
                             statusName = 'Bảo trì';
                             statusClass = 'bg-warning text-dark';
-                            break;
-                        case 3:
-                            statusName = 'Không sử dụng';
-                            statusClass = 'bg-danger';
                             break;
                         default:
                             statusName = 'Không xác định';

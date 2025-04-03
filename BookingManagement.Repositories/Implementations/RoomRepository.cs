@@ -54,7 +54,7 @@ namespace BookingManagement.Repositories.Implementations
             return await _context.Rooms
                 .Where(r => !bookedRoomIds.Contains(r.RoomId) && 
                            r.IsActive == true && 
-                           r.Status == 1) // Room đang hoạt động
+                           r.Status == 1) // Room đang hoạt động (không phải bảo trì)
                 .ToListAsync();
         }
 
@@ -74,6 +74,7 @@ namespace BookingManagement.Repositories.Implementations
             var room = await _context.Rooms
                 .FirstOrDefaultAsync(r => r.RoomId == roomId);
 
+            // Phòng phải có tồn tại, đang kích hoạt (IsActive = true) và trạng thái là Hoạt động (Status = 1, không phải đang bảo trì)
             if (room == null || room.IsActive != true || room.Status != 1)
                 return false;
 
@@ -84,6 +85,20 @@ namespace BookingManagement.Repositories.Implementations
         {
             return await _context.Rooms
                 .FirstOrDefaultAsync(r => r.RoomId == id);
+        }
+
+        public override async Task<IEnumerable<Room>> GetAllAsync()
+        {
+            return await _context.Rooms
+                .Where(r => r.IsActive == true)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Room>> GetArchivedRoomsAsync()
+        {
+            return await _context.Rooms
+                .Where(r => r.IsActive == false)
+                .ToListAsync();
         }
     }
 }

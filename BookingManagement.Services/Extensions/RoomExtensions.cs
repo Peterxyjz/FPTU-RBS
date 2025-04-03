@@ -52,7 +52,6 @@ namespace BookingManagement.Services.Extensions
             {
                 1 => "Hoạt động",
                 2 => "Bảo trì",
-                3 => "Không sử dụng",
                 _ => "Không xác định"
             };
         }
@@ -62,8 +61,7 @@ namespace BookingManagement.Services.Extensions
             return new Dictionary<int, string>
             {
                 { 1, "Hoạt động" },
-                { 2, "Bảo trì" },
-                { 3, "Không sử dụng" }
+                { 2, "Bảo trì" }
             };
         }
 

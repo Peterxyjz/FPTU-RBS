@@ -22,11 +22,13 @@ namespace BookingManagement.Admin.MVC.Controllers
     {
         private readonly IRoomService _roomService;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IConfiguration _configuration;
 
-        public RoomController(IRoomService roomService, IWebHostEnvironment webHostEnvironment)
+        public RoomController(IRoomService roomService, IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
         {
             _roomService = roomService;
             _webHostEnvironment = webHostEnvironment;
+            _configuration = configuration;
         }
 
         // GET: Room
@@ -65,7 +67,10 @@ namespace BookingManagement.Admin.MVC.Controllers
                 // Xử lý upload hình ảnh
                 if (roomDto.ImageFile != null && roomDto.ImageFile.Length > 0)
                 {
-                    var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "rooms");
+                    // Lấy đường dẫn thư mục chia sẻ từ cấu hình
+                    var sharedImagesPath = _configuration["SharedImagesFolderPath"];
+                    var uploadsFolder = Path.Combine(sharedImagesPath, "rooms");
+                    
                     // Trước khi lưu, chúng ta cần đảm bảo roomId (là roomNumber) đã có giá trị
                     // Sẽ lưu ảnh với tên là [roomNumber].[extension]
                     var uniqueFileName = $"{roomDto.RoomNumber}{Path.GetExtension(roomDto.ImageFile.FileName)}";
@@ -82,11 +87,11 @@ namespace BookingManagement.Admin.MVC.Controllers
                         await roomDto.ImageFile.CopyToAsync(fileStream);
                     }
 
-                    // Cập nhật ImageUrl là đường dẫn tương đối
-                    roomDto.ImageUrl = $"/images/rooms/{uniqueFileName}";
+                    // Cập nhật ImageUrl là đường dẫn tương đối 
+                    // Sử dụng đường dẫn tương đối virtual để dùng chung giữa các ứng dụng
+                    roomDto.ImageUrl = $"/shared-images/rooms/{uniqueFileName}";
                     
-                    // Sao chép ảnh sang dự án User.Razor
-                    await CopyImageToRazorProject(uniqueFileName);
+                    // Không cần sao chép ảnh nữa vì đã dùng thư mục chung
                 }
 
                 var room = roomDto.ToEntity();
@@ -130,15 +135,20 @@ namespace BookingManagement.Admin.MVC.Controllers
                     // Xử lý upload hình ảnh
                     if (roomDto.ImageFile != null && roomDto.ImageFile.Length > 0)
                     {
-                        var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "rooms");
+                        // Lấy đường dẫn thư mục chia sẻ từ cấu hình
+                        var sharedImagesPath = _configuration["SharedImagesFolderPath"];
+                        var uploadsFolder = Path.Combine(sharedImagesPath, "rooms");
+                        
                         // Sẽ lưu ảnh với tên là [roomNumber].[extension]
                         var uniqueFileName = $"{roomDto.RoomNumber}{Path.GetExtension(roomDto.ImageFile.FileName)}";
                         var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-                        // Xóa file cũ nếu có
+                        // Xóa file cũ nếu có (từ thư mục chung)
                         if (!string.IsNullOrEmpty(roomDto.ImageUrl))
                         {
-                            var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, roomDto.ImageUrl.TrimStart('/'));
+                            // Trích xuất tên file từ ImageUrl
+                            var oldFileName = Path.GetFileName(roomDto.ImageUrl);
+                            var oldImagePath = Path.Combine(sharedImagesPath, "rooms", oldFileName);
                             if (System.IO.File.Exists(oldImagePath))
                             {
                                 System.IO.File.Delete(oldImagePath);
@@ -156,11 +166,10 @@ namespace BookingManagement.Admin.MVC.Controllers
                             await roomDto.ImageFile.CopyToAsync(fileStream);
                         }
 
-                        // Cập nhật ImageUrl là đường dẫn tương đối
-                        roomDto.ImageUrl = $"/images/rooms/{uniqueFileName}";
+                        // Cập nhật ImageUrl là đường dẫn tương đối sử dụng cùng quy ước
+                        roomDto.ImageUrl = $"/shared-images/rooms/{uniqueFileName}";
                         
-                        // Sao chép ảnh sang dự án User.Razor
-                        await CopyImageToRazorProject(uniqueFileName);
+                        // Không cần sao chép ảnh nữa vì đã dùng thư mục chung
                     }
 
                     var room = roomDto.ToEntity();
@@ -204,26 +213,12 @@ namespace BookingManagement.Admin.MVC.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var room = await _roomService.GetRoomByIdAsync(id);
-            if (room != null && !string.IsNullOrEmpty(room.ImageUrl))
+            if (room != null)
             {
-                // Xóa file ảnh trong Admin.MVC
-                var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, room.ImageUrl.TrimStart('/'));
-                if (System.IO.File.Exists(imagePath))
-                {
-                    System.IO.File.Delete(imagePath);
-                }
-                
-                // Xóa file ảnh trong User.Razor
-                var fileName = Path.GetFileName(room.ImageUrl);
-                var razorImagePath = Path.Combine(_webHostEnvironment.ContentRootPath, "..", "BookingManagement.User.Razor", "wwwroot", "images", "rooms", fileName);
-                if (System.IO.File.Exists(razorImagePath))
-                {
-                    System.IO.File.Delete(razorImagePath);
-                }
+                // Thay đổi thành soft delete - chỉ set IsActive = false
+                room.IsActive = false;
+                await _roomService.UpdateRoomAsync(room);
             }
-            
-            await _roomService.DeleteRoomAsync(id);
-            
             
             return RedirectToAction(nameof(Index));
         }
@@ -243,6 +238,11 @@ namespace BookingManagement.Admin.MVC.Controllers
             }
             else if (status.HasValue)
             {
+                // Chỉ chấp nhận status là 1 hoặc 2
+                if (status != 1 && status != 2)
+                {
+                    status = 1; // Mặc định là Hoạt động nếu có giá trị không hợp lệ
+                }
                 rooms = await _roomService.GetRoomsByStatusAsync(status.Value);
             }
             else
@@ -268,10 +268,32 @@ namespace BookingManagement.Admin.MVC.Controllers
                 return NotFound();
             }
 
+            // Chỉ chấp nhận status là 1 (Hoạt động) hoặc 2 (Bảo trì)
+            if (status != 1 && status != 2)
+            {
+                return BadRequest(new { success = false, message = "Trạng thái không hợp lệ" });
+            }
+
             room.Status = status;
             await _roomService.UpdateRoomAsync(room);
             
             return Ok(new { success = true, message = "Cập nhật trạng thái thành công" });
+        }
+
+        // API: Room/Reactivate/5 - Kích hoạt lại phòng đã bị vô hiệu hóa
+        [HttpPost]
+        public async Task<IActionResult> Reactivate(int id)
+        {
+            var room = await _roomService.GetRoomByIdAsync(id);
+            if (room == null)
+            {
+                return NotFound();
+            }
+
+            room.IsActive = true;
+            await _roomService.UpdateRoomAsync(room);
+            
+            return Ok(new { success = true, message = "Kích hoạt lại phòng thành công" });
         }
 
         private async Task<bool> RoomExists(int roomNumber)
@@ -308,38 +330,14 @@ namespace BookingManagement.Admin.MVC.Controllers
             ViewBag.Statuses = new SelectList(RoomExtensions.GetRoomStatusList(), "Key", "Value");
         }
         
-        // Sao chép ảnh sang Razor project
-        private async Task CopyImageToRazorProject(string uniqueFileName)
+        // Method Sao chép ảnh sang Razor project đã được loại bỏ vì chúng ta đã dùng thư mục chung
+
+        // GET: Room/Archived
+        public async Task<IActionResult> Archived()
         {
-            try
-            {
-                // Đường dẫn đến file ảnh trong Admin.MVC
-                var sourcePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "rooms", uniqueFileName);
-                
-                // Đường dẫn đến thư mục của User.Razor project
-                var razorProjectPath = Path.Combine(_webHostEnvironment.ContentRootPath, "..", "BookingManagement.User.Razor", "wwwroot", "images", "rooms");
-                
-                // Tạo thư mục nếu chưa tồn tại
-                if (!Directory.Exists(razorProjectPath))
-                {
-                    Directory.CreateDirectory(razorProjectPath);
-                }
-                
-                // Đường dẫn đến file ảnh đích trong User.Razor
-                var destinationPath = Path.Combine(razorProjectPath, uniqueFileName);
-                
-                // Sao chép file
-                using (var sourceStream = new FileStream(sourcePath, FileMode.Open, FileAccess.Read))
-                using (var destinationStream = new FileStream(destinationPath, FileMode.Create, FileAccess.Write))
-                {
-                    await sourceStream.CopyToAsync(destinationStream);
-                }
-            }
-            catch (Exception ex)
-            {
-                // Log lỗi nhưng không ném ra exception
-                Console.WriteLine($"Error copying image to Razor project: {ex.Message}");
-            }
+            // Lấy danh sách các phòng đã bị vô hiệu hóa (IsActive = false)
+            var archivedRooms = await _roomService.GetArchivedRoomsAsync();
+            return View(archivedRooms);
         }
     }
 }

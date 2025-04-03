@@ -106,5 +106,10 @@ namespace BookingManagement.Services.Services
             await _roomRepository.UpdateAsync(room);
             await _unitOfWork.CompleteAsync();
         }
+
+        public async Task<IEnumerable<Room>> GetArchivedRoomsAsync()
+        {
+            return await _roomRepository.GetArchivedRoomsAsync();
+        }
     }
 }

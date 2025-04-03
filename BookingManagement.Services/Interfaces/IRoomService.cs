@@ -22,5 +22,6 @@ namespace BookingManagement.Services.Interfaces
         Task<bool> IsRoomAvailableAsync(int roomId, DateTime date, int timeSlotId);
         Task<IEnumerable<string>> GetRoomTypesAsync();
         Task<IEnumerable<string>> GetBuildingsAsync();
+        Task<IEnumerable<Room>> GetArchivedRoomsAsync();
     }
 }
