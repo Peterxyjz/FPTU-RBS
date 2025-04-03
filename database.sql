@@ -56,7 +56,7 @@ CREATE TABLE Room (
     Building NVARCHAR(100),
     Description NVARCHAR(MAX),
     ImageUrl NVARCHAR(255),
-    Status INT NOT NULL DEFAULT 1, -- 1: Hoạt động, 2: Bảo trì, 3: Không sử dụng
+    Status INT NOT NULL DEFAULT 1, -- 1: Hoạt động, 2: Bảo trì
     IsActive BIT DEFAULT 1,
     CreatedAt DATETIME NOT NULL DEFAULT GETDATE(),
     UpdatedAt DATETIME NOT NULL DEFAULT GETDATE()

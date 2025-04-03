@@ -23,15 +23,6 @@
                 @Html.DisplayNameFor(model => model.Booking[0].BookingDate)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Booking[0].RejectReason)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Booking[0].IsRecurring)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Booking[0].EndRecurringDate)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.Booking[0].Status)
             </th>
             <th></th>
@@ -52,15 +43,15 @@
             <td>
                     @Html.DisplayFor(modelItem => item.BookingDate)
             </td>
-            <td>
-                    @Html.DisplayFor(modelItem => item.RejectReason)
-            </td>
-            <td>
-                    @Html.DisplayFor(modelItem => item.IsRecurring)
-            </td>
-            <td>
-                    @Html.DisplayFor(modelItem => item.EndRecurringDate)
-            </td>
+            @* <td> *@
+            @*         @Html.DisplayFor(modelItem => item.RejectReason) *@
+            @* </td> *@
+            @* <td> *@
+            @*         @Html.DisplayFor(modelItem => item.IsRecurring) *@
+            @* </td> *@
+            @* <td> *@
+            @*         @Html.DisplayFor(modelItem => item.EndRecurringDate) *@
+            @* </td> *@
             <td>
                 @Model.GetStatusText(item.Status)
             </td>

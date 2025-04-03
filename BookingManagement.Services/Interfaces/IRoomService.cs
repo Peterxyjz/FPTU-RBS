@@ -12,6 +12,7 @@ namespace BookingManagement.Services.Interfaces
             string roomName, int? capacity, string roomType, int pageNumber, int pageSize);
         List<string> GetRoomTypeList();
         string GetStatusText(int status);
+        string GetStatusTextForRoomList(int status);
         string GetDirectImageUrl(string url);
     }
 }
