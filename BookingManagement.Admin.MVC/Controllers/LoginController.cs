@@ -8,21 +8,22 @@ using System.Security.Claims;
 
 namespace BookingManagement.Admin.MVC.Controllers
 {
-    public class AccountController : Controller
+    [AllowAnonymous]
+    public class LoginController : Controller
     {
         private readonly IAuthService _authService;
-        private readonly ILogger<AccountController> _logger;
+        private readonly ILogger<LoginController> _logger;
 
-        public AccountController(IAuthService authService, ILogger<AccountController> logger)
+        public LoginController(IAuthService authService, ILogger<LoginController> logger)
         {
             _authService = authService;
             _logger = logger;
         }
 
         [HttpGet]
-        public IActionResult Login(string returnUrl = null)
+        public IActionResult Index(string returnUrl = null)
         {
-            // Nếu đã đăng nhập thì chuyển hướng
+            // Nếu đã đăng nhập thì chuyển hướng đến trang chủ
             if (User.Identity?.IsAuthenticated == true)
             {
                 return RedirectToAction("Index", "Home");
@@ -34,7 +35,7 @@ namespace BookingManagement.Admin.MVC.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginDto model, string returnUrl = null)
+        public async Task<IActionResult> Index(LoginDto model, string returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
 
@@ -76,7 +77,7 @@ namespace BookingManagement.Admin.MVC.Controllers
             var userName = User.FindFirstValue(ClaimTypes.Name);
             await _authService.SignOutAsync(HttpContext);
             _logger.LogInformation($"Người dùng {userName} đã đăng xuất");
-            return RedirectToAction("Login");
+            return RedirectToAction("Index");
         }
 
         [HttpGet]

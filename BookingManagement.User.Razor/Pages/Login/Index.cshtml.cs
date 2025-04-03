@@ -1,4 +1,5 @@
 using BookingManagement.Services.DTOs;
+using BookingManagement.Services.Interfaces;
 using BookingManagement.Services.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;

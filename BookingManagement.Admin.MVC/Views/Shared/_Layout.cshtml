@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -7,44 +7,368 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/BookingManagement.Admin.MVC.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
+    <style>
+        :root {
+            --sidebar-width: 250px;
+            --sidebar-collapsed-width: 70px;
+            --header-height: 60px;
+            --primary-color: #3d5af1;
+            --primary-dark-color: #304dc2;
+            --secondary-color: #f1f5f9;
+        }
+
+        body {
+            overflow-x: hidden;
+            background-color: #f8f9fc;
+        }
+
+        .main-header {
+            height: var(--header-height);
+            background-color: white;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            z-index: 1030;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            min-height: 100vh;
+            background-color: var(--primary-color);
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1040;
+            transition: width 0.3s ease;
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        .sidebar-brand {
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 0 1rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: justify-content 0.3s ease;
+        }
+
+        .sidebar-brand-icon {
+            margin-right: 0.5rem;
+            font-size: 1.5rem;
+        }
+        
+        .sidebar.collapsed .sidebar-brand {
+            justify-content: center;
+        }
+        
+        .sidebar.collapsed .sidebar-brand-icon {
+            margin-right: 0;
+        }
+
+        .sidebar-brand-text {
+            white-space: nowrap;
+            overflow: hidden;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar.collapsed .sidebar-brand-text {
+            opacity: 0;
+            width: 0;
+        }
+
+        .sidebar-divider {
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            margin: 0 1rem;
+        }
+
+        .sidebar-heading {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.1rem;
+            padding: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar.collapsed .sidebar-heading {
+            opacity: 0;
+        }
+
+        .nav-item {
+            position: relative;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 0.75rem 1rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+            white-space: nowrap;
+            transition: justify-content 0.3s ease;
+        }
+        
+        .sidebar.collapsed .nav-link {
+            justify-content: center;
+            padding: 0.75rem 0.5rem;
+        }
+
+        .sidebar .nav-link:hover {
+            color: white;
+            background-color: var(--primary-dark-color);
+        }
+
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: var(--primary-dark-color);
+        }
+
+        .sidebar-icon {
+            font-size: 1.1rem;
+            width: 1.5rem;
+            text-align: center;
+            margin-right: 0.75rem;
+            transition: margin 0.3s ease, font-size 0.3s ease;
+        }
+        
+        .sidebar.collapsed .sidebar-icon {
+            margin-right: 0;
+            font-size: 1.25rem;
+        }
+
+        .nav-text {
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .sidebar.collapsed .nav-text {
+            opacity: 0;
+            width: 0;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            min-height: calc(100vh - var(--header-height));
+            padding: 1.5rem;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-content.expanded {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+
+        .user-dropdown {
+            position: relative;
+        }
+
+        .user-dropdown .dropdown-toggle::after {
+            display: none;
+        }
+
+        .toggle-sidebar {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.2rem;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .toggle-sidebar.rotated {
+            transform: rotate(180deg);
+        }
+
+        .toggle-sidebar:hover {
+            color: white;
+        }
+
+        @@media (max-width: 768px) {
+            .sidebar {
+                width: var(--sidebar-collapsed-width);
+            }
+
+            .main-content {
+                margin-left: var(--sidebar-collapsed-width);
+            }
+
+            .sidebar-brand-text, .sidebar-heading, .nav-text {
+                opacity: 0;
+                width: 0;
+            }
+
+            .sidebar.expanded {
+                width: var(--sidebar-width);
+            }
+
+            .sidebar.expanded .sidebar-brand-text,
+            .sidebar.expanded .sidebar-heading,
+            .sidebar.expanded .nav-text {
+                opacity: 1;
+                width: auto;
+            }
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">FPTU-RBS Admin</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                    <partial name="_LoginPartial" />
-                </div>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="sidebar-brand-icon">
+                <i class="bi bi-building-fill"></i>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+            <div class="sidebar-brand-text">FPTU-RBS Admin</div>
+        </div>
+        
+        <hr class="sidebar-divider">
+        
+        <div class="sidebar-heading">
+            Quản lý hệ thống
+        </div>
+        
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "Home" && ViewContext.RouteData.Values["Action"].ToString() == "Index" ? "active" : "")" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-house-fill sidebar-icon"></i>
+                    <span class="nav-text">Trang chủ</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "User" ? "active" : "")" asp-controller="User" asp-action="Index">
+                    <i class="bi bi-people-fill sidebar-icon"></i>
+                    <span class="nav-text">Quản lý người dùng</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "Room" ? "active" : "")" asp-controller="Room" asp-action="Index">
+                    <i class="bi bi-building-fill sidebar-icon"></i>
+                    <span class="nav-text">Quản lý phòng</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "Booking" ? "active" : "")" asp-controller="Booking" asp-action="Index">
+                    <i class="bi bi-calendar-check-fill sidebar-icon"></i>
+                    <span class="nav-text">Quản lý đặt phòng</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "TimeSlot" ? "active" : "")" asp-controller="TimeSlot" asp-action="Index">
+                    <i class="bi bi-clock-fill sidebar-icon"></i>
+                    <span class="nav-text">Quản lý khung giờ</span>
+                </a>
+            </li>
+        </ul>
+        
+        <hr class="sidebar-divider">
+        
+        <div class="sidebar-heading">
+            Báo cáo
+        </div>
+        
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "Dashboard" ? "active" : "")" asp-controller="Dashboard" asp-action="Index">
+                    <i class="bi bi-graph-up sidebar-icon"></i>
+                    <span class="nav-text">Thống kê</span>
+                </a>
+            </li>
+        </ul>
+        
+        <hr class="sidebar-divider">
+        
+        <div class="text-center mt-4 mb-3">
+            <button id="toggleSidebar" class="toggle-sidebar">
+                <i class="bi bi-arrow-left-square-fill"></i>
+            </button>
+        </div>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - FPTU Room Booking System - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <!-- Main Content Wrapper -->
+    <div class="main-content" id="content">
+        <!-- Top Navbar -->
+        <nav class="navbar navbar-expand navbar-light bg-white mb-4 shadow main-header">
+            <div class="container-fluid">
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-link me-3 d-md-none" id="mobileToggle">
+                        <i class="bi bi-list"></i>
+                    </button>
+                </div>
+                
+                <!-- Navbar items on the right -->
+                <ul class="navbar-nav ms-auto">
+                    <partial name="_LoginPartial" />
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Page Content -->
+        <div class="container-fluid">
+            @RenderBody()
         </div>
-    </footer>
+    </div>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Toggle sidebar on desktop
+            $('#toggleSidebar').on('click', function() {
+                $('#sidebar').toggleClass('collapsed');
+                $('#content').toggleClass('expanded');
+                
+                const $icon = $(this).find('i');
+                $(this).toggleClass('rotated');
+                if ($icon.hasClass('bi-arrow-left-square-fill')) {
+                    $icon.removeClass('bi-arrow-left-square-fill').addClass('bi-arrow-right-square-fill');
+                } else {
+                    $icon.removeClass('bi-arrow-right-square-fill').addClass('bi-arrow-left-square-fill');
+                }
+            });
+            
+            // Toggle sidebar on mobile
+            $('#mobileToggle').on('click', function() {
+                $('#sidebar').toggleClass('expanded');
+            });
+            
+            // Add tooltips to sidebar items when collapsed
+            function updateTooltips() {
+                if ($('#sidebar').hasClass('collapsed')) {
+                    $('.nav-link').each(function() {
+                        const text = $(this).find('.nav-text').text();
+                        $(this).attr('title', text);
+                    });
+                } else {
+                    $('.nav-link').removeAttr('title');
+                }
+            }
+            
+            // Initialize tooltips
+            updateTooltips();
+            
+            // Update tooltips when sidebar state changes
+            $('#toggleSidebar, #mobileToggle').on('click', function() {
+                setTimeout(updateTooltips, 300);
+            });
+        });
+    </script>
+    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

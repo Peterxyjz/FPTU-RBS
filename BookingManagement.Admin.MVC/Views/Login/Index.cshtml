@@ -21,13 +21,15 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+			min-width: 700px;
         }
         .login-container {
             width: 100%;
-            max-width: 420px;
+            max-width: 550px;
             padding: 15px;
         }
         .login-card {
+            max-width: 650px;
             border-radius: 0.5rem;
             overflow: hidden;
             box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
@@ -40,7 +42,7 @@
         }
         .login-body {
             background-color: white;
-            padding: 2rem;
+            padding: 2.5rem;
         }
         .login-footer {
             background-color: #f8f9fc;
@@ -71,7 +73,7 @@
                 <p class="mb-0">Đăng nhập quản trị hệ thống</p>
             </div>
             <div class="login-body">
-                <form asp-action="Login" asp-controller="Account" method="post">
+                <form asp-action="Index" asp-controller="Login" method="post">
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                     <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
 
@@ -92,8 +94,8 @@
                         <label asp-for="RememberMe" class="form-check-label" for="rememberMe">Ghi nhớ đăng nhập</label>
                     </div>
 
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary btn-lg">
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg py-3">
                             <i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập
                         </button>
                     </div>

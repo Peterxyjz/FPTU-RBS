@@ -2,6 +2,7 @@ using BookingManagement.Repositories.Interfaces;
 using BookingManagement.Repositories.Models;
 using BookingManagement.Repositories.UnitOfWork;
 using BookingManagement.Services.DTOs;
+using BookingManagement.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
@@ -9,14 +10,6 @@ using System.Security.Claims;
 
 namespace BookingManagement.Services.Services
 {
-    public interface IAuthService
-    {
-        Task<(bool Success, string Role)> AuthenticateAsync(string email, string password, HttpContext httpContext, bool rememberMe = false);
-        Task<RegisterResultDto> RegisterUserAsync(RegisterDto registerDto);
-        Task SignOutAsync(HttpContext httpContext);
-        Task<User?> GetUserByEmailAsync(string email);
-        Task<Role?> GetRoleByIdAsync(int roleId);
-    }
 
     public class AuthService : IAuthService
     {

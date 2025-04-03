@@ -1,0 +1,64 @@
+@model BookingManagement.Repositories.Models.Room
+
+@{
+    ViewData["Title"] = "Xóa phòng";
+    var statusName = BookingManagement.Services.Extensions.RoomExtensions.GetRoomStatusName(Model.Status);
+}
+
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Xóa phòng</h1>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Xác nhận xóa phòng này?</h6>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong>Cảnh báo:</strong> Hành động này sẽ vô hiệu hóa phòng và không thể khôi phục. Các đặt phòng hiện tại liên quan đến phòng này sẽ không bị ảnh hưởng.
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-3 fw-bold">Số phòng:</div>
+                <div class="col-md-9">@Model.RoomId</div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-3 fw-bold">Tên phòng:</div>
+                <div class="col-md-9">@Model.RoomName</div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-3 fw-bold">Loại phòng:</div>
+                <div class="col-md-9">@Model.RoomType</div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-3 fw-bold">Tòa nhà:</div>
+                <div class="col-md-9">@(string.IsNullOrEmpty(Model.Building) ? "Không xác định" : Model.Building)</div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-3 fw-bold">Sức chứa:</div>
+                <div class="col-md-9">@Model.Capacity người</div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-3 fw-bold">Trạng thái:</div>
+                <div class="col-md-9">@statusName</div>
+            </div>
+
+            <form asp-action="Delete" class="mt-4">
+                <input type="hidden" asp-for="RoomId" />
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa phòng này?')">
+                        <i class="bi bi-trash me-1"></i> Xác nhận xóa
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle me-1"></i> Hủy
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
