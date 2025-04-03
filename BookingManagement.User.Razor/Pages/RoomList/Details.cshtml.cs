@@ -42,9 +42,9 @@ namespace BookingManagement.User.Razor.Pages.RoomList
             return Page();
         }
 
-        public string GetStatusText(int status)
+        public string GetStatusTextForRoomList(int status)
         {
-            return _roomService.GetStatusText(status);
+            return _roomService.GetStatusTextForRoomList(status);
         }
 
         public string GetDirectImageUrl(string url)

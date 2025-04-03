@@ -70,6 +70,16 @@ namespace BookingManagement.Services.Services
             };
         }
 
+        public string GetStatusTextForRoomList(int status)
+        {
+            return status switch
+            {
+                1 => "Hoạt động",
+                2 => "Bảo trì",
+                _ => status.ToString()
+            };
+        }
+
         public string GetDirectImageUrl(string url)
         {
             if (string.IsNullOrEmpty(url))
