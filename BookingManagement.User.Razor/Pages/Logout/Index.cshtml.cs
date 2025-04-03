@@ -1,3 +1,4 @@
+using BookingManagement.Services.Interfaces;
 using BookingManagement.Services.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
