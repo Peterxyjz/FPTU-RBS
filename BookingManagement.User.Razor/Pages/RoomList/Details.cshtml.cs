@@ -7,17 +7,19 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using BookingManagement.Repositories.Data;
 using BookingManagement.Repositories.Models;
+using BookingManagement.Services.Interfaces;
 
 namespace BookingManagement.User.Razor.Pages.RoomList
 {
     public class DetailsModel : PageModel
     {
-        private readonly BookingManagement.Repositories.Data.FptuRoomBookingContext _context;
+        private readonly IRoomService _roomService;
 
-        public DetailsModel(BookingManagement.Repositories.Data.FptuRoomBookingContext context)
+        public DetailsModel(IRoomService roomService)
         {
-            _context = context;
+            _roomService = roomService;
         }
+
 
         public Room Room { get; set; } = default!;
 
@@ -28,7 +30,7 @@ namespace BookingManagement.User.Razor.Pages.RoomList
                 return NotFound();
             }
 
-            var room = await _context.Rooms.FirstOrDefaultAsync(m => m.RoomId == id);
+            var room = await _roomService.GetByIdAsync(id ?? default);
             if (room == null)
             {
                 return NotFound();
@@ -42,36 +44,12 @@ namespace BookingManagement.User.Razor.Pages.RoomList
 
         public string GetStatusText(int status)
         {
-            return status switch
-            {
-                1 => "Chờ duyệt",
-                2 => "Đã duyệt",
-                3 => "Từ chối",
-                4 => "Đã hủy",
-                _ => status.ToString()
-            };
+            return _roomService.GetStatusText(status);
         }
 
         public string GetDirectImageUrl(string url)
         {
-            if (string.IsNullOrEmpty(url))
-                return string.Empty;
-            // Kiểm tra nếu là URL Google Search
-            if (url.Contains("google.com/url"))
-            {
-                try
-                {
-                    Uri uri = new Uri(url);
-                    var queryParams = System.Web.HttpUtility.ParseQueryString(uri.Query);
-                    string directUrl = queryParams["url"];
-                    if (!string.IsNullOrEmpty(directUrl))
-                        return directUrl;
-                }
-                catch
-                {
-                }
-            }
-            return url;
+            return _roomService.GetDirectImageUrl(url);
         }
     }
 }

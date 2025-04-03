@@ -16,6 +16,11 @@ namespace BookingManagement.Repositories.Implementations
         {
         }
 
+        public IQueryable<Room> GetQuery()
+        {
+            return _context.Set<Room>().AsQueryable();
+        }
+
         public async Task<IEnumerable<Room>> GetRoomsByBuildingAsync(string building)
         {
             return await _context.Rooms
@@ -84,6 +89,39 @@ namespace BookingManagement.Repositories.Implementations
         {
             return await _context.Rooms
                 .FirstOrDefaultAsync(r => r.RoomId == id);
+        }
+
+        public async Task<(IEnumerable<Room> Rooms, int TotalItems)> GetFilteredRoomsAsync(
+            string roomName, int? capacity, string roomType, int pageNumber, int pageSize)
+        {
+            var query = GetQuery();
+
+            // Áp dụng các bộ lọc
+            if (!string.IsNullOrEmpty(roomName))
+            {
+                query = query.Where(r => r.RoomName.Contains(roomName));
+            }
+
+            if (capacity.HasValue && capacity > 0)
+            {
+                query = query.Where(r => r.Capacity >= capacity);
+            }
+
+            if (!string.IsNullOrEmpty(roomType))
+            {
+                query = query.Where(r => r.RoomType == roomType);
+            }
+
+            // Đếm tổng số lượng items để tính số trang
+            var totalItems = await query.CountAsync();
+
+            // Lấy dữ liệu cho trang hiện tại
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalItems);
         }
     }
 }

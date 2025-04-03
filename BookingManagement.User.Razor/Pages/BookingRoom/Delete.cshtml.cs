@@ -10,6 +10,7 @@ using BookingManagement.Repositories.Models;
 using BookingManagement.Services.Interfaces;
 using BookingManagement.Services.DTOs;
 using Microsoft.AspNetCore.Authorization;
+using BookingManagement.Services.Services;
 
 namespace BookingManagement.User.Razor.Pages.BookingRoom
 {
@@ -18,13 +19,15 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
     {
         private readonly IBookingService _bookingService;
         private readonly ITimeSlotService _timeSlotService;
+        private readonly IRoomService _roomService;
         private readonly ILogger<DeleteModel> _logger;
 
-        public DeleteModel(IBookingService bookingService, ITimeSlotService timeSlotService, ILogger<DeleteModel> logger)
+        public DeleteModel(IBookingService bookingService, ITimeSlotService timeSlotService, ILogger<DeleteModel> logger, IRoomService roomService)
         {
             _bookingService = bookingService;
             _timeSlotService = timeSlotService;
             _logger = logger;
+            _roomService = roomService;
         }
 
         [BindProperty]
@@ -83,14 +86,7 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
 
         public string GetStatusText(int status)
         {
-            return status switch
-            {
-                1 => "Chờ duyệt",
-                2 => "Đã duyệt",
-                3 => "Từ chối",
-                4 => "Đã hủy",
-                _ => status.ToString()
-            };
+            return _roomService.GetStatusText(status);
         }
     }
 }
