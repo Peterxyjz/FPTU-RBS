@@ -1,4 +1,5 @@
 using BookingManagement.Services.DTOs;
+using BookingManagement.Services.Interfaces;
 using BookingManagement.Services.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -40,7 +41,9 @@ namespace BookingManagement.Admin.MVC.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            var (success, role) = await _authService.AuthenticateAsync(model.Email, model.Password, HttpContext, model.RememberMe);
+            var result = await _authService.AuthenticateAsync(model.Email, model.Password, HttpContext, model.RememberMe);
+            bool success = result.Success;
+            string role = result.Role;
 
             if (success)
             {

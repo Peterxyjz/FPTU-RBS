@@ -1,6 +1,8 @@
 using BookingManagement.Repositories.Extensions;
+using BookingManagement.Services.Interfaces;
 using BookingManagement.Services.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +14,10 @@ builder.Services.AddRepositories(builder.Configuration);
 
 // Đăng ký các services
 builder.Services.AddScoped<IAuthService, AuthService>();
-
+builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<ITimeSlotService, TimeSlotService>();
+builder.Services.AddScoped<IRoomService, RoomService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 // Cấu hình Authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -43,6 +48,13 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+// Cấu hình để phục vụ file từ thư mục chia sẻ
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(builder.Configuration["SharedImagesFolderPath"]),
+    RequestPath = "/shared-images"
+});
 
 app.UseRouting();
 

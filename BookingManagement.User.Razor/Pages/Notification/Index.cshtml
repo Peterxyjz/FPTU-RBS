@@ -1,0 +1,69 @@
+﻿@page
+@model BookingManagement.User.Razor.Pages.Notifications.IndexModel
+@{
+    ViewData["Title"] = "Thông báo";
+}
+
+<div class="container mt-4">
+    <h2>Thông báo của bạn</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="d-flex justify-content-between mb-3">
+        <div>
+            <a asp-page="/RoomList/Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
+        <div>
+            <a asp-page-handler="MarkAllAsRead" class="btn btn-primary">
+                Đánh dấu tất cả là đã đọc
+            </a>
+        </div>
+    </div>
+
+    @if (!Model.Notifications.Any())
+    {
+        <div class="alert alert-info">
+            Bạn không có thông báo nào.
+        </div>
+    }
+    else
+    {
+        <div class="list-group">
+            @foreach (var notification in Model.Notifications)
+            {
+                <div class="list-group-item @(notification.IsRead == false ? "list-group-item-primary" : "")">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">@notification.Title</h5>
+                        <small>@notification.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                    </div>
+                    <p class="mb-1">@notification.Message</p>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <div>
+                            @if (notification.BookingId.HasValue)
+                            {
+                                <a asp-page="/BookingRoom/Index" asp-route-id="@notification.BookingId" class="btn btn-sm btn-outline-info">
+                                    Xem chi tiết đặt phòng
+                                </a>
+                            }
+                        </div>
+                        <div>
+                            @if (notification.IsRead == false)
+                            {
+                                <a asp-page-handler="MarkAsRead" asp-route-id="@notification.NotificationId" class="btn btn-sm btn-outline-secondary">
+                                    Đánh dấu đã đọc
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

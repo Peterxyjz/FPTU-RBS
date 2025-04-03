@@ -13,5 +13,9 @@ namespace BookingManagement.Repositories.Interfaces
         Task<IEnumerable<Room>> GetRoomsByStatusAsync(int status);
         Task<IEnumerable<Room>> GetAvailableRoomsAsync(DateTime date, int timeSlotId);
         Task<bool> IsRoomAvailableAsync(int roomId, DateTime date, int timeSlotId);
+        Task<IEnumerable<Room>> GetArchivedRoomsAsync();
+        Task<(IEnumerable<Room> Rooms, int TotalItems)> GetFilteredRoomsAsync(
+            string roomName, int? capacity, string roomType, int pageNumber, int pageSize);
+        IQueryable<Room> GetQuery();
     }
 }

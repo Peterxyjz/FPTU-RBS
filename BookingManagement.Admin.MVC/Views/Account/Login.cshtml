@@ -1,47 +1,113 @@
 @model BookingManagement.Services.DTOs.LoginDto
 
 @{
-    ViewData["Title"] = "Đăng nhập quản trị";
+    ViewData["Title"] = "Đăng nhập";
+    Layout = null;
 }
 
-<div class="row justify-content-center mt-5">
-    <div class="col-md-6">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h3 class="text-center mb-0">FPTU-RBS</h3>
-                <p class="text-center mb-0">Đăng nhập quản trị</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - FPTU-RBS Admin</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            background-color: #f8f9fc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 15px;
+        }
+        .login-card {
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        .login-header {
+            background-color: #3d5af1;
+            color: white;
+            padding: 2rem 1.5rem;
+            text-align: center;
+        }
+        .login-body {
+            background-color: white;
+            padding: 2rem;
+        }
+        .login-footer {
+            background-color: #f8f9fc;
+            border-top: 1px solid #e3e6f0;
+            padding: 1rem;
+            text-align: center;
+        }
+        .brand-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .form-floating {
+            margin-bottom: 1rem;
+        }
+        .form-floating:focus-within {
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="brand-icon">
+                    <i class="bi bi-building"></i>
+                </div>
+                <h3 class="mb-0">FPTU-RBS</h3>
+                <p class="mb-0">Đăng nhập quản trị hệ thống</p>
             </div>
-            <div class="card-body p-4">
+            <div class="login-body">
                 <form asp-action="Login" asp-controller="Account" method="post">
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                     <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
 
-                    <div class="mb-3">
-                        <label asp-for="Email" class="form-label">Email</label>
-                        <input asp-for="Email" class="form-control" placeholder="Nhập email" />
+                    <div class="form-floating">
+                        <input asp-for="Email" class="form-control" placeholder="Nhập email" id="floatingEmail" />
+                        <label asp-for="Email" for="floatingEmail">Email</label>
                         <span asp-validation-for="Email" class="text-danger"></span>
                     </div>
 
-                    <div class="mb-3">
-                        <label asp-for="Password" class="form-label">Mật khẩu</label>
-                        <input asp-for="Password" type="password" class="form-control" placeholder="Nhập mật khẩu" />
+                    <div class="form-floating">
+                        <input asp-for="Password" type="password" class="form-control" placeholder="Nhập mật khẩu" id="floatingPassword" />
+                        <label asp-for="Password" for="floatingPassword">Mật khẩu</label>
                         <span asp-validation-for="Password" class="text-danger"></span>
                     </div>
 
-                    <div class="mb-3 form-check">
-                        <input asp-for="RememberMe" type="checkbox" class="form-check-input" />
-                        <label asp-for="RememberMe" class="form-check-label">Ghi nhớ đăng nhập</label>
+                    <div class="form-check mb-3">
+                        <input asp-for="RememberMe" type="checkbox" class="form-check-input" id="rememberMe" />
+                        <label asp-for="RememberMe" class="form-check-label" for="rememberMe">Ghi nhớ đăng nhập</label>
                     </div>
 
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">Đăng nhập</button>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập
+                        </button>
                     </div>
                 </form>
             </div>
+            <div class="login-footer">
+                <p class="mb-0">&copy; @DateTime.Now.Year - FPTU Room Booking System</p>
+            </div>
         </div>
     </div>
-</div>
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>
