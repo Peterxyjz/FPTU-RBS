@@ -7,20 +7,30 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using BookingManagement.Repositories.Data;
 using BookingManagement.Repositories.Models;
+using BookingManagement.Services.Interfaces;
+using BookingManagement.Services.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookingManagement.User.Razor.Pages.BookingRoom
 {
+    [Authorize]
     public class DeleteModel : PageModel
     {
-        private readonly BookingManagement.Repositories.Data.FptuRoomBookingContext _context;
+        private readonly IBookingService _bookingService;
+        private readonly ITimeSlotService _timeSlotService;
+        private readonly ILogger<DeleteModel> _logger;
 
-        public DeleteModel(BookingManagement.Repositories.Data.FptuRoomBookingContext context)
+        public DeleteModel(IBookingService bookingService, ITimeSlotService timeSlotService, ILogger<DeleteModel> logger)
         {
-            _context = context;
+            _bookingService = bookingService;
+            _timeSlotService = timeSlotService;
+            _logger = logger;
         }
 
         [BindProperty]
         public Booking Booking { get; set; } = default!;
+        public TimeSlotDto TimeSlotDto { get; set; } = default!;
+
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -29,16 +39,24 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
                 return NotFound();
             }
 
-            var booking = await _context.Bookings.FirstOrDefaultAsync(m => m.BookingId == id);
-
-            if (booking == null)
+            var booking = await _bookingService.GetByIdAsync(id ?? default);
+            var timeSlot = await _timeSlotService.GetActiveTimeSlotByIdAsync(booking.TimeSlotId);
+            if (booking == null && timeSlot == null)
             {
                 return NotFound();
             }
             else
             {
                 Booking = booking;
+                TimeSlotDto = timeSlot;
             }
+
+            if (booking.Status != 1)
+            {
+                _logger.LogWarning("chỉ được cập nhậy khi trong trạng thái chờ xử lý");
+                return RedirectToPage("/BookingRoom/Index");
+            }
+
             return Page();
         }
 
@@ -49,12 +67,15 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
                 return NotFound();
             }
 
-            var booking = await _context.Bookings.FindAsync(id);
-            if (booking != null)
+
+            try
             {
-                Booking = booking;
-                _context.Bookings.Remove(Booking);
-                await _context.SaveChangesAsync();
+                await _bookingService.DeleteAsync(id ?? default);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                throw;
             }
 
             return RedirectToPage("./Index");

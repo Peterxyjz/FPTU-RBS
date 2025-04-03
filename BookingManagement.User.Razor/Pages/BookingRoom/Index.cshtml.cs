@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using BookingManagement.Repositories.Data;
 using BookingManagement.Repositories.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookingManagement.User.Razor.Pages.BookingRoom
 {
+    [Authorize]
     public class IndexModel : PageModel
     {
         private readonly BookingManagement.Repositories.Data.FptuRoomBookingContext _context;
