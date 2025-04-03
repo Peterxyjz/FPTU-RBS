@@ -5,6 +5,19 @@
     ViewData["Title"] = "Index";
 }
 
+@if ((TempData["message"] != null))
+{
+    <div class="alert alert-danger text-center">
+        @TempData["message"]
+    </div>
+}
+@if ((TempData["messageSC"] != null))
+{
+    <div class="alert alert-success text-center">
+        @TempData["messageSC"]
+    </div>
+}
+
 <h1>Lịch của tôi</h1>
 
 <table class="table">
