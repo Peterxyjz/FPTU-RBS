@@ -1,0 +1,121 @@
+@model IEnumerable<BookingManagement.Repositories.Models.Room>
+
+@{
+    ViewData["Title"] = "Phòng đã lưu trữ";
+    var statuses = BookingManagement.Services.Extensions.RoomExtensions.GetRoomStatusList();
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Phòng đã lưu trữ</h1>
+    <a asp-action="Index" class="btn btn-primary">
+        <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách phòng
+    </a>
+</div>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-primary">Danh sách phòng đã lưu trữ (Soft Delete)</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover" id="archivedRoomsTable" width="100%" cellspacing="0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên phòng</th>
+                        <th>Sức chứa</th>
+                        <th>Loại phòng</th>
+                        <th>Tòa nhà</th>
+                        <th>Hình ảnh</th>
+                        <th>Trạng thái</th>
+                        <th width="150">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var statusName = BookingManagement.Services.Extensions.RoomExtensions.GetRoomStatusName(item.Status);
+                        var statusBadgeClass = item.Status switch
+                        {
+                            1 => "bg-success",
+                            2 => "bg-warning text-dark",
+                            _ => "bg-secondary"
+                        };
+
+                        <tr>
+                            <td>@item.RoomId</td>
+                            <td>@item.RoomName</td>
+                            <td>@item.Capacity</td>
+                            <td>@item.RoomType</td>
+                            <td>@item.Building</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                {
+                                    <img src="@item.ImageUrl" alt="@item.RoomName" class="img-thumbnail" style="max-height: 50px; max-width: 50px;" />
+                                }
+                                else
+                                {
+                                    <span class="text-muted"><i class="bi bi-image"></i></span>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge @statusBadgeClass">@statusName</span>
+                                <span class="badge bg-danger ms-1">Đã lưu trữ</span>
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+                                        <i class="bi bi-gear"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><a class="dropdown-item" asp-action="Details" asp-route-id="@item.RoomId"><i class="bi bi-info-circle me-2"></i>Chi tiết</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><button class="dropdown-item text-success reactivate-action" data-room-id="@item.RoomId"><i class="bi bi-arrow-counterclockwise me-2"></i>Kích hoạt lại</button></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Khởi tạo DataTable
+            $('#archivedRoomsTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json'
+                },
+                "order": [[0, "desc"]]
+            });
+
+            // Xử lý kích hoạt lại phòng
+            $('.reactivate-action').on('click', function () {
+                const roomId = $(this).data('room-id');
+
+                if (confirm(`Bạn có chắc chắn muốn kích hoạt lại phòng #${roomId}?`)) {
+                    $.ajax({
+                        url: '@Url.Action("Reactivate")/' + roomId,
+                        type: 'POST',
+                        success: function (result) {
+                            if (result.success) {
+                                alert(result.message);
+                                // Reload trang để cập nhật danh sách
+                                location.reload();
+                            } else {
+                                alert('Có lỗi xảy ra: ' + result.message);
+                            }
+                        },
+                        error: function () {
+                            alert('Đã xảy ra lỗi khi kích hoạt lại phòng.');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}

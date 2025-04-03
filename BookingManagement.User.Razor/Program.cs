@@ -2,6 +2,7 @@ using BookingManagement.Repositories.Extensions;
 using BookingManagement.Services.Interfaces;
 using BookingManagement.Services.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,6 +48,13 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
+// Cấu hình để phục vụ file từ thư mục chia sẻ
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(builder.Configuration["SharedImagesFolderPath"]),
+    RequestPath = "/shared-images"
+});
 
 app.UseRouting();
 

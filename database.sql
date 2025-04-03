@@ -184,11 +184,11 @@ INSERT INTO [User] (Email, Password, FullName, RoleID) VALUES
 GO
 
 -- Thêm phòng học mẫu (Room)
-INSERT INTO Room (RoomID, RoomName, Capacity, RoomType, Building, Description) VALUES 
-(101, N'Phòng học 101', 40, N'Phòng học', N'Alpha', N'Phòng học tiêu chuẩn'),
-(102, N'Phòng học 102', 40, N'Phòng học', N'Alpha', N'Phòng học tiêu chuẩn'),
-(201, N'Phòng lab 201', 30, N'Phòng máy tính', N'Beta', N'Phòng máy tính với 30 máy'),
-(301, N'Phòng hội thảo 301', 100, N'Phòng hội thảo', N'Gamma', N'Phòng hội thảo lớn');
+INSERT INTO Room (RoomID, RoomName, Capacity, RoomType, Building, Description, ImageUrl) VALUES 
+(101, N'Phòng học 101', 40, N'Phòng học', N'Alpha', N'Phòng học tiêu chuẩn', N'/shared-images/rooms/101.png'),
+(102, N'Phòng học 102', 40, N'Phòng học', N'Alpha', N'Phòng học tiêu chuẩn', N'/shared-images/rooms/102.png'),
+(201, N'Phòng lab 201', 30, N'Phòng máy tính', N'Beta', N'Phòng máy tính với 30 máy', N'/shared-images/rooms/201.png'),
+(301, N'Phòng hội thảo 301', 100, N'Phòng hội thảo', N'Gamma', N'Phòng hội thảo lớn', N'/shared-images/rooms/301.png');
 GO
 
 -- Thêm khung giờ mẫu (TimeSlot)
@@ -200,3 +200,6 @@ INSERT INTO TimeSlot (StartTime, EndTime) VALUES
 ('17:30:00', '19:45:00'), -- Slot 5: 17:30 - 19:45
 ('20:00:00', '22:15:00'); -- Slot 6: 20:00 - 22:15
 GO
+
+SELECT * FROM Room
+

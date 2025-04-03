@@ -1,0 +1,175 @@
+@model BookingManagement.Services.DTOs.UserDto
+
+@{
+    ViewData["Title"] = "Chi tiết người dùng";
+}
+
+<!-- Page Heading -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Chi tiết người dùng</h1>
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model.UserId" class="btn btn-primary">
+            <i class="bi bi-pencil me-1"></i> Chỉnh sửa
+        </a>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Quay lại
+        </a>
+    </div>
+</div>
+
+<!-- Alerts -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i>
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Thông tin người dùng</h6>
+                <div>
+                    @if (Model.IsActive == true)
+                    {
+                        <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Đang hoạt động</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i> Bị khóa</span>
+                    }
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-borderless">
+                        <tbody>
+                            <tr>
+                                <th style="width: 150px;">ID:</th>
+                                <td>@Model.UserId</td>
+                            </tr>
+                            <tr>
+                                <th>Email:</th>
+                                <td>@Model.Email</td>
+                            </tr>
+                            <tr>
+                                <th>Họ tên:</th>
+                                <td>@Model.FullName</td>
+                            </tr>
+                            <tr>
+                                <th>Vai trò:</th>
+                                <td>@Model.RoleName</td>
+                            </tr>
+                            <tr>
+                                <th>Ngày tạo:</th>
+                                <td>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                            </tr>
+                            <tr>
+                                <th>Cập nhật lần cuối:</th>
+                                <td>@Model.UpdatedAt.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mt-4">
+                    <h6 class="font-weight-bold">Thao tác</h6>
+                    <div class="d-flex mt-3">
+                        <a asp-action="ChangePassword" asp-route-id="@Model.UserId" class="btn btn-warning me-2">
+                            <i class="bi bi-key me-1"></i> Đổi mật khẩu
+                        </a>
+                        
+                        @if (Model.IsActive == true)
+                        {
+                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#lockModal">
+                                <i class="bi bi-lock me-1"></i> Khóa tài khoản
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#unlockModal">
+                                <i class="bi bi-unlock me-1"></i> Mở khóa tài khoản
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Hoạt động gần đây</h6>
+            </div>
+            <div class="card-body">
+                <div class="text-center py-4">
+                    <i class="bi bi-clock-history" style="font-size: 3rem; color: #dddfeb;"></i>
+                    <p class="mt-2 text-muted">Chức năng theo dõi hoạt động sẽ được cập nhật sau.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lock Modal -->
+<div class="modal fade" id="lockModal" tabindex="-1" aria-labelledby="lockModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="lockModalLabel">Xác nhận khóa tài khoản</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn khóa tài khoản của <strong>@Model.FullName</strong> (@Model.Email)?</p>
+                <p>Người dùng sẽ không thể đăng nhập sau khi bị khóa.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <form asp-action="ChangeStatus" asp-route-id="@Model.UserId" asp-route-isActive="false" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-lock me-1"></i> Khóa tài khoản
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Unlock Modal -->
+<div class="modal fade" id="unlockModal" tabindex="-1" aria-labelledby="unlockModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="unlockModalLabel">Xác nhận mở khóa tài khoản</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn mở khóa tài khoản của <strong>@Model.FullName</strong> (@Model.Email)?</p>
+                <p>Người dùng sẽ có thể đăng nhập lại sau khi được mở khóa.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <form asp-action="ChangeStatus" asp-route-id="@Model.UserId" asp-route-isActive="true" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-unlock me-1"></i> Mở khóa tài khoản
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
