@@ -29,27 +29,25 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-
             if (id == null)
             {
-                // Handle the case where RoomId is not
-                _logger.LogWarning("không tìm thất id yah");
+                _logger.LogWarning("không tìm thấy id yah");
+                TempData["message"] = "không tìm thấy id yah!";
                 return RedirectToPage("/RoomList/Index");
             }
 
-            // Initialize the Booking model if not already initialized
             if (Booking == null)
             {
                 Booking = new Booking();
             }
 
-            // Get the logged-in user's UserId from the claims
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (!string.IsNullOrEmpty(userIdClaim) && int.TryParse(userIdClaim, out int loggedInUserId))
             {
                 if (!await _bookingService.CheckUserBookingLimitAsync(loggedInUserId))
                 {
                     _logger.LogWarning("chỉ giới hạn được đặt 3 phòng hoi nghe chưa!");
+                    TempData["message"] = "chỉ giới hạn được đặt 3 phòng hoi nghe chưa!";
                     return RedirectToPage("/RoomList/Index");
                 }
 
@@ -58,26 +56,56 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
             }
             else
             {
-                // Handle the case where the user is not logged in
                 _logger.LogWarning("User chưa loggin");
+                TempData["message"] = "User chưa loggin!";
                 return RedirectToPage("/Login/Index");
             }
 
-
-            // Set the RoomId and BookingDate
             Booking.RoomId = id.Value;
             Booking.BookingDate = DateOnly.FromDateTime(DateTime.Now);
 
+            // Lấy danh sách tất cả time slot
+            var allTimeSlots = await _timeSlotService.GetActiveTimeSlotsAsync();
 
-            // Populate the TimeSlotId dropdown
-            var list = await _timeSlotService.GetActiveTimeSlotsAsync();
+            // Lấy danh sách TimeSlotId đã được đặt cho phòng và ngày
+            var bookedTimeSlotIds = await _bookingService.GetBookedTimeSlotIdsAsync(Booking.RoomId, Booking.BookingDate);
+
+            // Lọc các time slot chưa được đặt
+            var availableTimeSlots = allTimeSlots
+                .Where(ts => !bookedTimeSlotIds.Contains(ts.TimeSlotId))
+                .ToList();
+
+            // Populate dropdown với các time slot chưa được đặt
             ViewData["TimeSlotId"] = new SelectList(
-                list,
+                availableTimeSlots,
                 "TimeSlotId",
                 "DisplayText"
             );
 
             return Page();
+        }
+
+        public async Task<IActionResult> OnGetAvailableTimeSlotsAsync(int roomId, string bookingDate)
+        {
+            // Chuyển đổi bookingDate từ string sang DateOnly
+            if (!DateOnly.TryParse(bookingDate, out var parsedBookingDate))
+            {
+                return BadRequest("Invalid booking date format.");
+            }
+
+            // Lấy danh sách tất cả time slot
+            var allTimeSlots = await _timeSlotService.GetActiveTimeSlotsAsync();
+
+            // Lấy danh sách TimeSlotId đã được đặt
+            var bookedTimeSlotIds = await _bookingService.GetBookedTimeSlotIdsAsync(roomId, parsedBookingDate);
+
+            // Lọc các time slot chưa được đặt
+            var availableTimeSlots = allTimeSlots
+                .Where(ts => !bookedTimeSlotIds.Contains(ts.TimeSlotId))
+                .Select(ts => new { ts.TimeSlotId, ts.DisplayText })
+                .ToList();
+
+            return new JsonResult(availableTimeSlots);
         }
 
         public string UserName { get; set; } = "";
@@ -93,27 +121,40 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
                 await _bookingService.AddAsync(Booking);
 
                 _logger.LogInformation($"booking thành công!!!");
+<<<<<<< HEAD
                 TempData["SuccessMessage"] = "Đặt phòng thành công! Bạn có một thông báo mới.";
                 return RedirectToPage("/RoomList/Index");
+=======
+                TempData["messageSC"] = "booking thành công!!!";
+                return RedirectToPage("./Index");
+>>>>>>> c40759e1e001e673473102694972f18250a02af1
             }
             catch (Exception ex)
             {
-                // Log the exception (you can use a logging framework like Serilog or ILogger)
                 ModelState.AddModelError(string.Empty, ex.Message);
 
-                // Repopulate the dropdown and UserName for the view
-                var list = await _timeSlotService.GetActiveTimeSlotsAsync();
+                // Lấy danh sách tất cả time slot
+                var allTimeSlots = await _timeSlotService.GetActiveTimeSlotsAsync();
+
+                // Lấy danh sách TimeSlotId đã được đặt cho phòng và ngày
+                var bookedTimeSlotIds = await _bookingService.GetBookedTimeSlotIdsAsync(Booking.RoomId, Booking.BookingDate);
+
+                // Lọc các time slot chưa được đặt
+                var availableTimeSlots = allTimeSlots
+                    .Where(ts => !bookedTimeSlotIds.Contains(ts.TimeSlotId))
+                    .ToList();
+
+                // Populate dropdown với các time slot chưa được đặt
                 ViewData["TimeSlotId"] = new SelectList(
-                    list,
+                    availableTimeSlots,
                     "TimeSlotId",
                     "DisplayText"
                 );
 
-                // Repopulate UserName for the view
                 var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (!string.IsNullOrEmpty(userIdClaim) && int.TryParse(userIdClaim, out int loggedInUserId))
                 {
-                    Booking.UserId = loggedInUserId; // Ensure UserId is set
+                    Booking.UserId = loggedInUserId;
                     UserName = User.FindFirst(ClaimTypes.Name)?.Value ?? "Unknown User";
                 }
 

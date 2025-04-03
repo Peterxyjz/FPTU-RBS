@@ -324,9 +324,24 @@ namespace BookingManagement.Services.Services
                 .ContinueWith(task => task.Result.Count(b => (b.Status == 1 || b.Status == 2)));
 
             // Return true if the user has fewer than the maximum allowed active bookings
-            return activeBookingCount <= maxActiveBookings;
+            return activeBookingCount < maxActiveBookings;
         }
 
+        public async Task<List<int>> GetBookedTimeSlotIdsAsync(int roomId, DateOnly bookingDate)
+        {
+            // Lấy tất cả booking cho phòng và ngày đã chọn
+            var bookings = await _unitOfWork.Bookings.GetAllAsync();
 
+            // Lọc các booking có trạng thái 1 (Pending) hoặc 2 (Approved) cho phòng và ngày cụ thể
+            var bookedTimeSlots = bookings
+                .Where(b => b.RoomId == roomId &&
+                            b.BookingDate == bookingDate &&
+                            (b.Status == 1 || b.Status == 2))
+                .Select(b => b.TimeSlotId)
+                .Distinct()
+                .ToList();
+
+            return bookedTimeSlots;
+        }
     }
 }
