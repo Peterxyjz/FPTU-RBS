@@ -7,38 +7,44 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using BookingManagement.Repositories.Data;
 using BookingManagement.Repositories.Models;
+using Microsoft.AspNetCore.Authorization;
+using BookingManagement.Services.Interfaces;
+using System.Security.Claims;
 
 namespace BookingManagement.User.Razor.Pages.BookingRoom
 {
+    [Authorize]
     public class IndexModel : PageModel
     {
-        private readonly BookingManagement.Repositories.Data.FptuRoomBookingContext _context;
+        private readonly IRoomService _roomService;
+        private readonly IBookingService _bookingService;
 
-        public IndexModel(BookingManagement.Repositories.Data.FptuRoomBookingContext context)
+        public IndexModel(IBookingService bookingService, IRoomService roomService)
         {
-            _context = context;
+            _bookingService = bookingService;
+            _roomService = roomService;
         }
 
         public IList<Booking> Booking { get;set; } = default!;
 
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync()
         {
-            Booking = await _context.Bookings
-                .Include(b => b.Room)
-                .Include(b => b.TimeSlot)
-                .Include(b => b.User).ToListAsync();
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userIdClaim) && int.TryParse(userIdClaim, out int loggedInUserId))
+            {
+                Booking = (IList<Booking>)await _bookingService.GetBookingsByUserIdAsync(loggedInUserId);
+            }
+            else
+            {
+                TempData["message"] = "User chưa loggin!";
+                return RedirectToPage("/Login/Index");
+            }
+            return Page();    
         }
 
         public string GetStatusText(int status)
         {
-            return status switch
-            {
-                1 => "Chờ duyệt",
-                2 => "Đã duyệt",
-                3 => "Từ chối",
-                4 => "Đã hủy",
-                _ => status.ToString()
-            };
+            return _roomService.GetStatusText(status);
         }
     }
 }

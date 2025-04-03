@@ -13,6 +13,18 @@
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
+    @inject BookingManagement.Services.Interfaces.INotificationService NotificationService
+    @{
+        int unreadCount = 0;
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userIdClaim) && int.TryParse(userIdClaim, out int userId))
+            {
+                unreadCount = await NotificationService.GetUnreadCountAsync(userId);
+            }
+        }
+    }
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
@@ -28,14 +40,23 @@
                         </li>
                         @if (User.Identity?.IsAuthenticated == true)
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" href="#">Đặt phòng</a>
-                            </li>
+                            @*     <li class="nav-item"> *@
+                            @*         <a class="nav-link text-dark" href="#">Đặt phòng</a> *@
+                            @*     </li> *@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-page="/BookingRoom/Index">Lịch của tôi</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-page="/RoomList/Index">Danh sách phòng</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-page="/Notification/Index">
+                                    Thông báo
+                                    @if (unreadCount > 0)
+                                    {
+                                        <span class="badge bg-danger">@unreadCount</span>
+                                    }
+                                </a>
                             </li>
                         }
                         else

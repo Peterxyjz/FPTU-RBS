@@ -4,6 +4,13 @@
     ViewData["Title"] = "Danh sách phòng";
 }
 
+@if ((TempData["message"] != null))
+{
+    <div class="alert alert-danger text-center">
+        @TempData["message"]
+    </div>
+}
+
 <h1>Danh sách phòng</h1>
 
 <div class="row mb-4">
@@ -106,10 +113,13 @@
                     }
                 </td>
                 <td>
-                    @Model.GetStatusText(item.Status)
+                    @Model.GetStatusTextForRoomList(item.Status)
                 </td>
                 <td>
-                    <a asp-page="./Details" asp-route-id="@item.RoomId">Details</a>
+                    @if (item.Status == 1)
+                    {
+                        <a asp-page="./Details" asp-route-id="@item.RoomId">Details</a>
+                    }
                 </td>
             </tr>
         }

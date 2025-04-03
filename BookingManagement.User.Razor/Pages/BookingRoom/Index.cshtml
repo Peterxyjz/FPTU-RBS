@@ -5,6 +5,19 @@
     ViewData["Title"] = "Index";
 }
 
+@if ((TempData["message"] != null))
+{
+    <div class="alert alert-danger text-center">
+        @TempData["message"]
+    </div>
+}
+@if ((TempData["messageSC"] != null))
+{
+    <div class="alert alert-success text-center">
+        @TempData["messageSC"]
+    </div>
+}
+
 <h1>Lịch của tôi</h1>
 
 <table class="table">
@@ -21,15 +34,6 @@
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Booking[0].BookingDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Booking[0].RejectReason)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Booking[0].IsRecurring)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Booking[0].EndRecurringDate)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Booking[0].Status)
@@ -52,22 +56,22 @@
             <td>
                     @Html.DisplayFor(modelItem => item.BookingDate)
             </td>
-            <td>
-                    @Html.DisplayFor(modelItem => item.RejectReason)
-            </td>
-            <td>
-                    @Html.DisplayFor(modelItem => item.IsRecurring)
-            </td>
-            <td>
-                    @Html.DisplayFor(modelItem => item.EndRecurringDate)
-            </td>
+            @* <td> *@
+            @*         @Html.DisplayFor(modelItem => item.RejectReason) *@
+            @* </td> *@
+            @* <td> *@
+            @*         @Html.DisplayFor(modelItem => item.IsRecurring) *@
+            @* </td> *@
+            @* <td> *@
+            @*         @Html.DisplayFor(modelItem => item.EndRecurringDate) *@
+            @* </td> *@
             <td>
                 @Model.GetStatusText(item.Status)
             </td>
             <td>
                 <a asp-page="./Edit" asp-route-id="@item.BookingId">Edit</a> |
                 <a asp-page="./Details" asp-route-id="@item.BookingId">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.BookingId">Delete</a>
+                <a asp-page="./Delete" asp-route-id="@item.BookingId">Cancel</a>
             </td>
         </tr>
 }

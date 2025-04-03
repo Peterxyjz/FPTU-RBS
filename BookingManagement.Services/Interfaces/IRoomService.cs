@@ -1,4 +1,4 @@
-﻿using BookingManagement.Repositories.Models;
+using BookingManagement.Repositories.Models;
 using BookingManagement.Services.DTOs;
 using System;
 using System.Collections.Generic;
@@ -23,5 +23,14 @@ namespace BookingManagement.Services.Interfaces
         Task<IEnumerable<string>> GetRoomTypesAsync();
         Task<IEnumerable<string>> GetBuildingsAsync();
         Task<IEnumerable<Room>> GetArchivedRoomsAsync();
+    
+        Task<IEnumerable<Room>> GetAllAsync();
+        Task<Room?> GetByIdAsync(int id);
+        Task<(IEnumerable<Room> Rooms, int TotalPages, int CurrentPage)> GetRoomsWithFilterAsync(
+            string roomName, int? capacity, string roomType, int pageNumber, int pageSize);
+        List<string> GetRoomTypeList();
+        string GetStatusText(int status);
+        string GetStatusTextForRoomList(int status);
+        string GetDirectImageUrl(string url);
     }
 }
