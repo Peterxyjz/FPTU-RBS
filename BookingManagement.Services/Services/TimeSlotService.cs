@@ -31,5 +31,18 @@ namespace BookingManagement.Services.Services
 
             return timeSlotDtos;
         }
+
+        public async Task<TimeSlotDto> GetActiveTimeSlotByIdAsync(int id)
+        {
+            var timeslot = await _unitOfWork.TimeSlots.GetByIdAsync(id);
+
+            var timeSlotDto = new TimeSlotDto
+            {
+                TimeSlotId = timeslot.TimeSlotId,
+                DisplayText = $"Slot {timeslot.TimeSlotId}: {timeslot.StartTime:hh\\:mm} - {timeslot.EndTime:hh\\:mm}"
+            };
+
+            return timeSlotDto;
+        }
     }
 }

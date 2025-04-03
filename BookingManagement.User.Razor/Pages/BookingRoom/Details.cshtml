@@ -15,7 +15,7 @@
             @Html.DisplayNameFor(model => model.Booking.User)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Booking.User.Email)
+            @Html.DisplayFor(model => model.Booking.User.FullName)
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Booking.Room)
@@ -27,7 +27,7 @@
             @Html.DisplayNameFor(model => model.Booking.TimeSlot)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Booking.TimeSlot.TimeSlotId)
+            @Html.DisplayFor(model => model.TimeSlotDto.DisplayText)
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Booking.BookingDate)

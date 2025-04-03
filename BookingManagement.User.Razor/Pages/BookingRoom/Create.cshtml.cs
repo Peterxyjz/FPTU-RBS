@@ -9,9 +9,11 @@ using BookingManagement.Repositories.Models;
 using System.Security.Claims;
 using BookingManagement.Services.Interfaces;
 using System.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookingManagement.User.Razor.Pages.BookingRoom
 {
+    [Authorize]
     public class CreateModel : PageModel
     {
         private readonly IBookingService _bookingService;

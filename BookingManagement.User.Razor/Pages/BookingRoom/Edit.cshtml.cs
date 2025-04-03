@@ -8,17 +8,27 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BookingManagement.Repositories.Data;
 using BookingManagement.Repositories.Models;
+using BookingManagement.Services.Interfaces;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookingManagement.User.Razor.Pages.BookingRoom
 {
+    [Authorize]
     public class EditModel : PageModel
     {
-        private readonly BookingManagement.Repositories.Data.FptuRoomBookingContext _context;
+        private readonly IBookingService _bookingService;
+        private readonly ITimeSlotService _timeSlotService;
+        private readonly ILogger<EditModel> _logger;
 
-        public EditModel(BookingManagement.Repositories.Data.FptuRoomBookingContext context)
+        public EditModel(IBookingService bookingService, ITimeSlotService timeSlotService, ILogger<EditModel> logger)
         {
-            _context = context;
+            _bookingService = bookingService;
+            _timeSlotService = timeSlotService;
+            _logger = logger;
         }
+
+        public string UserName { get; set; }
 
         [BindProperty]
         public Booking Booking { get; set; } = default!;
@@ -27,18 +37,44 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
         {
             if (id == null)
             {
-                return NotFound();
+                // Handle the case where RoomId is not
+                _logger.LogWarning("không tìm thất id yah");
+                return RedirectToPage("/BookingRoom/Index");
             }
 
-            var booking =  await _context.Bookings.FirstOrDefaultAsync(m => m.BookingId == id);
+            var booking = await _bookingService.GetByIdAsync(id ?? default);
+
             if (booking == null)
             {
-                return NotFound();
+                _logger.LogWarning("không tìm thất booking yah");
+                return RedirectToPage("/BookingRoom/Index");
             }
+            if(booking.Status != 1)
+            {
+                _logger.LogWarning("chỉ được cập nhậy khi trong trạng thái chờ xử lý");
+                return RedirectToPage("/BookingRoom/Index");
+            }
+
             Booking = booking;
-           ViewData["RoomId"] = new SelectList(_context.Rooms, "RoomId", "RoomName");
-           ViewData["TimeSlotId"] = new SelectList(_context.TimeSlots, "TimeSlotId", "TimeSlotId");
-           ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Email");
+
+            var userNameClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (!string.IsNullOrEmpty(userNameClaim))
+            {
+                UserName = User.FindFirst(ClaimTypes.Name)?.Value ?? "Unknown User";
+            }
+            else
+            {
+                _logger.LogWarning("User chưa loggin");
+                return RedirectToPage("/Login/Index");
+            }
+            var list = await _timeSlotService.GetActiveTimeSlotsAsync();
+            ViewData["TimeSlotId"] = new SelectList(
+                list,
+                "TimeSlotId",
+                "DisplayText"
+            );
+
             return Page();
         }
 
@@ -46,30 +82,45 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
         // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
-            if (!ModelState.IsValid)
-            {
-                return Page();
-            }
-
-            _context.Attach(Booking).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!BookingExists(Booking.BookingId))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+                var existingBooking = await _bookingService.GetByIdAsync(Booking.BookingId);
 
-            return RedirectToPage("./Index");
+                existingBooking.UserId = Booking.UserId;
+                existingBooking.RoomId = Booking.RoomId;
+                existingBooking.BookingDate = Booking.BookingDate;
+                existingBooking.TimeSlotId = Booking.TimeSlotId;
+                existingBooking.RejectReason = Booking.RejectReason;
+                existingBooking.IsRecurring = Booking.IsRecurring;
+                existingBooking.EndRecurringDate = Booking.EndRecurringDate;
+
+                await _bookingService.UpdateAsync(existingBooking);
+
+                _logger.LogInformation($"edit booking thành công!!!");
+                return RedirectToPage("/BookingRoom/Index");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (you can use a logging framework like Serilog or ILogger)
+                ModelState.AddModelError(string.Empty, ex.Message);
+
+                // Repopulate the dropdown and UserName for the view
+                var list = await _timeSlotService.GetActiveTimeSlotsAsync();
+                ViewData["TimeSlotId"] = new SelectList(
+                    list,
+                    "TimeSlotId",
+                    "DisplayText"
+                );
+
+                // Repopulate UserName for the view
+                var userNameClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!string.IsNullOrEmpty(userNameClaim))
+                {
+                    UserName = User.FindFirst(ClaimTypes.Name)?.Value ?? "Unknown User";
+                }
+
+                return Page();
+            }
         }
         public string GetStatusText(int status)
         {
@@ -83,9 +134,5 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
             };
         }
 
-        private bool BookingExists(int id)
-        {
-            return _context.Bookings.Any(e => e.BookingId == id);
-        }
     }
 }
