@@ -119,27 +119,22 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
             try
             {
                 await _bookingService.AddAsync(Booking);
+                TempData["SuccessMessage"] = "Đặt phòng thành công! Bạn có một thông báo mới.";
+                return RedirectToPage("/RoomList/Index");
 
-                _logger.LogInformation($"booking thành công!!!");
-                TempData["messageSC"] = "booking thành công!!!";
-                return RedirectToPage("./Index");
             }
             catch (Exception ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
 
-                // Lấy danh sách tất cả time slot
                 var allTimeSlots = await _timeSlotService.GetActiveTimeSlotsAsync();
 
-                // Lấy danh sách TimeSlotId đã được đặt cho phòng và ngày
                 var bookedTimeSlotIds = await _bookingService.GetBookedTimeSlotIdsAsync(Booking.RoomId, Booking.BookingDate);
 
-                // Lọc các time slot chưa được đặt
                 var availableTimeSlots = allTimeSlots
                     .Where(ts => !bookedTimeSlotIds.Contains(ts.TimeSlotId))
                     .ToList();
 
-                // Populate dropdown với các time slot chưa được đặt
                 ViewData["TimeSlotId"] = new SelectList(
                     availableTimeSlots,
                     "TimeSlotId",

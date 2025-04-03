@@ -154,23 +154,26 @@ namespace BookingManagement.Services.Services
                     throw new InvalidOperationException("Bookings cannot be made for past dates.");
                 }
 
-                // Check for overlapping bookings (same room, date, and time slot)
-                var hasOverlap = await _unitOfWork.Bookings.HasOverlappingBookingsAsync(
-                    booking.RoomId,
-                    DateTime.Now, // The date parameter is not used directly in the method, so we can pass any DateTime
-                    booking.TimeSlotId);
-
-                if (hasOverlap)
+                // Kiểm tra trùng lịch chỉ khi thay đổi ngày đặt hoặc khung giờ
+                if (oldBookingDate != booking.BookingDate || oldTimeSlotId != booking.TimeSlotId)
                 {
-                    throw new InvalidOperationException("This room is already booked for the selected date and time slot.");
+                    var hasOverlap = await _unitOfWork.Bookings.HasOverlappingBookingsAsync(
+                        booking.RoomId,
+                        DateTime.Now, // The date parameter is not used directly in the method, so we can pass any DateTime
+                        booking.TimeSlotId);
+
+                    if (hasOverlap)
+                    {
+                        throw new InvalidOperationException("This room is already booked for the selected date and time slot.");
+                    }
                 }
 
                 // If the booking is for today, check if the time slot has already passed
                 if (booking.BookingDate == today)
                 {
                     // Fetch the TimeSlot to get its EndTime
-                    var timeSlot = await _unitOfWork.TimeSlots.GetByIdAsync(booking.TimeSlotId);
-                    if (timeSlot == null)
+                    var timeslot = await _unitOfWork.TimeSlots.GetByIdAsync(booking.TimeSlotId);
+                    if (timeslot == null)
                     {
                         throw new InvalidOperationException("Invalid time slot selected.");
                     }
@@ -179,7 +182,7 @@ namespace BookingManagement.Services.Services
                     var currentTime = TimeOnly.FromDateTime(DateTime.Now);
 
                     // If the time slot's EndTime is earlier than the current time, it's in the past
-                    if (timeSlot.EndTime <= currentTime)
+                    if (timeslot.EndTime <= currentTime)
                     {
                         throw new InvalidOperationException("Cannot book a time slot that has already passed.");
                     }
@@ -188,57 +191,68 @@ namespace BookingManagement.Services.Services
                 // Cập nhật booking trong database
                 booking.UpdatedAt = DateTime.Now;
                 await _unitOfWork.Bookings.UpdateAsync(booking);
-                await _unitOfWork.CompleteAsync();
 
-                // Tạo thông báo nếu có thay đổi trạng thái, ngày đặt hoặc khung giờ
-                if (oldStatus != booking.Status || oldBookingDate != booking.BookingDate || oldTimeSlotId != booking.TimeSlotId)
+                // Lấy thông tin phòng và khung giờ mới cho thông báo
+                var room = await _unitOfWork.Rooms.GetByIdAsync(booking.RoomId);
+                var timeSlot = await _unitOfWork.TimeSlots.GetByIdAsync(booking.TimeSlotId);
+
+                var notification = new Notification
                 {
-                    // Lấy thông tin phòng và khung giờ mới
-                    var room = await _unitOfWork.Rooms.GetByIdAsync(booking.RoomId);
-                    var timeSlot = await _unitOfWork.TimeSlots.GetByIdAsync(booking.TimeSlotId);
+                    UserId = booking.UserId,
+                    Title = "Đặt phòng đã được cập nhật",
+                    Message = $"Đặt phòng của bạn cho phòng {room.RoomName} đã được thay đổi thành ngày {booking.BookingDate.ToString("dd/MM/yyyy")}, khung giờ {timeSlot.StartTime}-{timeSlot.EndTime}.",
+                    IsRead = false,
+                    BookingId = booking.BookingId,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+                };
 
-                    string title = "";
-                    string message = "";
+                //string title;
+                //string message;
 
-                    // Tạo thông báo tùy theo loại thay đổi
-                    if (oldStatus != booking.Status)
-                    {
-                        // Thông báo khi trạng thái thay đổi
-                        title = GetStatusChangeTitle(booking.Status);
-                        message = GetStatusChangeMessage(booking.Status, room.RoomName, booking.BookingDate, timeSlot);
-                    }
-                    else if (oldBookingDate != booking.BookingDate || oldTimeSlotId != booking.TimeSlotId)
-                    {
-                        // Thông báo khi ngày đặt hoặc khung giờ thay đổi
-                        title = "Đặt phòng đã được cập nhật";
-                        message = $"Đặt phòng của bạn cho phòng {room.RoomName} đã được thay đổi thành ngày {booking.BookingDate.ToString("dd/MM/yyyy")}, khung giờ {timeSlot.StartTime}-{timeSlot.EndTime}.";
-                    }
+                //// Xác định nội dung thông báo dựa trên loại thay đổi
+                //if (oldStatus != booking.Status)
+                //{
+                //    title = GetStatusChangeTitle(booking.Status);
+                //    message = GetStatusChangeMessage(booking.Status, room.RoomName, booking.BookingDate, timeSlot);
+                //}
+                //else if (oldBookingDate != booking.BookingDate || oldTimeSlotId != booking.TimeSlotId)
+                //{
+                //    title = "Đặt phòng đã được cập nhật";
+                //    message = $"Đặt phòng của bạn cho phòng {room.RoomName} đã được thay đổi thành ngày {booking.BookingDate.ToString("dd/MM/yyyy")}, khung giờ {timeSlot.StartTime}-{timeSlot.EndTime}.";
+                //}
+                //else
+                //{
+                //    // Luôn tạo thông báo khi có bất kỳ cập nhật nào
+                //    title = "Đặt phòng đã được cập nhật";
+                //    message = $"Đặt phòng của bạn cho phòng {room.RoomName} đã được cập nhật thành công.";
+                //}
 
-                    if (!string.IsNullOrEmpty(title))
-                    {
-                        var notification = new Notification
-                        {
-                            UserId = booking.UserId,
-                            Title = title,
-                            Message = message,
-                            IsRead = false,
-                            BookingId = booking.BookingId,
-                            CreatedAt = DateTime.Now,
-                            UpdatedAt = DateTime.Now
-                        };
+                //// Tạo thông báo
+                //var notification = new Notification
+                //{
+                //    UserId = booking.UserId,
+                //    Title = title,
+                //    Message = message,
+                //    IsRead = false,
+                //    BookingId = booking.BookingId,
+                //    CreatedAt = DateTime.Now,
+                //    UpdatedAt = DateTime.Now
+                //};
 
-                        await _unitOfWork.Notifications.AddAsync(notification);
-                        await _unitOfWork.CompleteAsync();
-                    }
-                }
+                await _unitOfWork.Notifications.AddAsync(notification);
+
+                // Commit tất cả các thay đổi trong một transaction
+                await _unitOfWork.CompleteAsync();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                // Log the exception for debugging
+                Console.WriteLine($"Error updating booking: {ex.Message}");
                 throw;
             }
         }
 
-        // Helper methods to get title and message based on booking status
         private string GetStatusChangeTitle(int status)
         {
             switch (status)
