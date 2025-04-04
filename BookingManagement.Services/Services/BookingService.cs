@@ -83,7 +83,7 @@ namespace BookingManagement.Services.Services
                 // Set default values for booking
                 booking.CreatedAt = DateTime.Now;
                 booking.UpdatedAt = DateTime.Now;
-                booking.Status = 0; // Pending status
+                booking.Status = 1; // Pending status according to DB
                 booking.IsRecurring ??= false;
 
                 // Add the booking to the database
@@ -257,11 +257,11 @@ namespace BookingManagement.Services.Services
         {
             switch (status)
             {
-                case 0: return "Đặt phòng đang chờ xử lý";
-                case 1: return "Đặt phòng đã được phê duyệt";
-                case 2: return "Đặt phòng đã hoàn thành";
+                case 1: return "Đặt phòng đang chờ xử lý";
+                case 2: return "Đặt phòng đã được phê duyệt";
                 case 3: return "Đặt phòng đã bị từ chối";
-                case 4: return "Đặt phòng đã bị hủy";
+                case 4: return "Đặt phòng đã hoàn thành";
+                case 5: return "Đặt phòng đã bị hủy";
                 default: return "Cập nhật trạng thái đặt phòng";
             }
         }
@@ -270,15 +270,15 @@ namespace BookingManagement.Services.Services
         {
             switch (status)
             {
-                case 0:
-                    return $"Đặt phòng của bạn cho phòng {roomName} vào ngày {bookingDate.ToString("dd/MM/yyyy")}, khung giờ {timeSlot.StartTime}-{timeSlot.EndTime} đang được xử lý.";
                 case 1:
-                    return $"Đặt phòng của bạn cho phòng {roomName} vào ngày {bookingDate.ToString("dd/MM/yyyy")}, khung giờ {timeSlot.StartTime}-{timeSlot.EndTime} đã được phê duyệt.";
+                    return $"Đặt phòng của bạn cho phòng {roomName} vào ngày {bookingDate.ToString("dd/MM/yyyy")}, khung giờ {timeSlot.StartTime}-{timeSlot.EndTime} đang được xử lý.";
                 case 2:
-                    return $"Đặt phòng của bạn cho phòng {roomName} vào ngày {bookingDate.ToString("dd/MM/yyyy")}, khung giờ {timeSlot.StartTime}-{timeSlot.EndTime} đã hoàn thành.";
+                    return $"Đặt phòng của bạn cho phòng {roomName} vào ngày {bookingDate.ToString("dd/MM/yyyy")}, khung giờ {timeSlot.StartTime}-{timeSlot.EndTime} đã được phê duyệt.";
                 case 3:
                     return $"Đặt phòng của bạn cho phòng {roomName} vào ngày {bookingDate.ToString("dd/MM/yyyy")}, khung giờ {timeSlot.StartTime}-{timeSlot.EndTime} đã bị từ chối.";
                 case 4:
+                    return $"Đặt phòng của bạn cho phòng {roomName} vào ngày {bookingDate.ToString("dd/MM/yyyy")}, khung giờ {timeSlot.StartTime}-{timeSlot.EndTime} đã hoàn thành.";
+                case 5:
                     return $"Đặt phòng của bạn cho phòng {roomName} vào ngày {bookingDate.ToString("dd/MM/yyyy")}, khung giờ {timeSlot.StartTime}-{timeSlot.EndTime} đã bị hủy.";
                 default:
                     return $"Trạng thái đặt phòng của bạn cho phòng {roomName} vào ngày {bookingDate.ToString("dd/MM/yyyy")}, khung giờ {timeSlot.StartTime}-{timeSlot.EndTime} đã được cập nhật.";
@@ -303,8 +303,8 @@ namespace BookingManagement.Services.Services
                     throw new InvalidOperationException("Only pending bookings can be cancelled.");
                 }
 
-                // Update status to 4 (cancelled) instead of deleting
-                booking.Status = 4;
+                // Update status to 5 (cancelled) instead of deleting
+                booking.Status = 5;
                 booking.UpdatedAt = DateTime.Now;
                 await _unitOfWork.Bookings.UpdateAsync(booking);
                 await _unitOfWork.CompleteAsync();
@@ -340,7 +340,7 @@ namespace BookingManagement.Services.Services
 
             // Count the number of active bookings for the user
             var activeBookingCount = await _unitOfWork.Bookings.GetBookingsByUserIdAsync(userId)
-                .ContinueWith(task => task.Result.Count(b => (b.Status == 1 || b.Status == 2)));
+                .ContinueWith(task => task.Result.Count(b => (b.Status == 2 || b.Status == 4)));
 
             // Return true if the user has fewer than the maximum allowed active bookings
             return activeBookingCount < maxActiveBookings;
@@ -351,11 +351,11 @@ namespace BookingManagement.Services.Services
             // Lấy tất cả booking cho phòng và ngày đã chọn
             var bookings = await _unitOfWork.Bookings.GetAllAsync();
 
-            // Lọc các booking có trạng thái 1 (Pending) hoặc 2 (Approved) cho phòng và ngày cụ thể
+            // Lọc các booking có trạng thái 2 (Đã duyệt) hoặc 4 (Đã hoàn thành) cho phòng và ngày cụ thể
             var bookedTimeSlots = bookings
                 .Where(b => b.RoomId == roomId &&
                             b.BookingDate == bookingDate &&
-                            (b.Status == 1 || b.Status == 2))
+                            (b.Status == 2 || b.Status == 4))
                 .Select(b => b.TimeSlotId)
                 .Distinct()
                 .ToList();

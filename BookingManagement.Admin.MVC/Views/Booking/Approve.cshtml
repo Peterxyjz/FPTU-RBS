@@ -1,0 +1,63 @@
+﻿@model BookingManagement.Repositories.Models.Booking
+
+@{
+    ViewData["Title"] = "Phê duyệt đặt phòng";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Phê duyệt đặt phòng</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/Home">Trang chủ</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Quản lý đặt phòng</a></li>
+        <li class="breadcrumb-item active">Phê duyệt</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-check me-1"></i>
+            Xác nhận phê duyệt yêu cầu đặt phòng
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Bạn có chắc chắn muốn phê duyệt yêu cầu đặt phòng này?</h5>
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <h6>Thông tin đặt phòng</h6>
+                    <dl class="row">
+                        <dt class="col-sm-4">Mã đặt phòng:</dt>
+                        <dd class="col-sm-8">@Model.BookingId</dd>
+
+                        <dt class="col-sm-4">Người đặt:</dt>
+                        <dd class="col-sm-8">@Model.User.FullName</dd>
+
+                        <dt class="col-sm-4">Phòng:</dt>
+                        <dd class="col-sm-8">@Model.Room.RoomName</dd>
+
+                        <dt class="col-sm-4">Ngày đặt:</dt>
+                        <dd class="col-sm-8">@Model.BookingDate.ToString("dd/MM/yyyy")</dd>
+
+                        <dt class="col-sm-4">Khung giờ:</dt>
+                        <dd class="col-sm-8">@Model.TimeSlot.StartTime.ToString("HH:mm") - @Model.TimeSlot.EndTime.ToString("HH:mm")</dd>
+                    </dl>
+                </div>
+            </div>
+            <div class="alert alert-info mt-3">
+                <i class="fas fa-info-circle"></i> 
+                Sau khi phê duyệt, người dùng sẽ nhận được thông báo và có thể sử dụng phòng vào ngày và giờ đã đặt.
+            </div>
+        </div>
+        <div class="card-footer">
+            <form asp-action="ApproveConfirmed" method="post">
+                <input type="hidden" name="id" value="@Model.BookingId" />
+                @Html.AntiForgeryToken()
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Quay lại
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check"></i> Xác nhận phê duyệt
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
