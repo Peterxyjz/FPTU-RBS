@@ -126,21 +126,8 @@ namespace BookingManagement.Admin.MVC.Controllers
             booking.UpdatedAt = DateTime.Now;
             await _bookingService.UpdateAsync(booking);
 
-            // Lấy thông tin phòng và khung giờ cho thông báo
-            var room = await _roomService.GetRoomByIdAsync(booking.RoomId);
-            var timeSlotDto = await _timeSlotService.GetTimeSlotByIdAsync(booking.TimeSlotId);
-
-            // Tạo thông báo cho người dùng
-            await _notificationService.CreateAsync(new Notification
-            {
-                UserId = booking.UserId,
-                Title = "Đặt phòng đã được phê duyệt",
-                Message = $"Yêu cầu đặt phòng {room.RoomName} vào ngày {booking.BookingDate.ToString("dd/MM/yyyy")}, khung giờ {timeSlotDto.StartTime}-{timeSlotDto.EndTime} đã được phê duyệt.",
-                IsRead = false,
-                BookingId = booking.BookingId,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now
-            });
+            // Gửi thông báo real-time
+            await _notificationService.NotifyBookingStatusChangeAsync(booking, "Approved");
 
             TempData["SuccessMessage"] = "Yêu cầu đặt phòng đã được phê duyệt thành công.";
             return RedirectToAction(nameof(Index));
@@ -188,21 +175,8 @@ namespace BookingManagement.Admin.MVC.Controllers
             booking.UpdatedAt = DateTime.Now;
             await _bookingService.UpdateAsync(booking);
 
-            // Lấy thông tin phòng và khung giờ cho thông báo
-            var room = await _roomService.GetRoomByIdAsync(booking.RoomId);
-            var timeSlotDto = await _timeSlotService.GetTimeSlotByIdAsync(booking.TimeSlotId);
-
-            // Tạo thông báo cho người dùng
-            await _notificationService.CreateAsync(new Notification
-            {
-                UserId = booking.UserId,
-                Title = "Đặt phòng đã bị từ chối",
-                Message = $"Yêu cầu đặt phòng {room.RoomName} vào ngày {booking.BookingDate.ToString("dd/MM/yyyy")}, khung giờ {timeSlotDto.StartTime}-{timeSlotDto.EndTime} đã bị từ chối. Lý do: {rejectReason}",
-                IsRead = false,
-                BookingId = booking.BookingId,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now
-            });
+            // Gửi thông báo real-time
+            await _notificationService.NotifyBookingStatusChangeAsync(booking, "Rejected");
 
             TempData["SuccessMessage"] = "Yêu cầu đặt phòng đã bị từ chối.";
             return RedirectToAction(nameof(Index));
@@ -253,20 +227,20 @@ namespace BookingManagement.Admin.MVC.Controllers
             var room = await _roomService.GetRoomByIdAsync(booking.RoomId);
             var timeSlotDto = await _timeSlotService.GetTimeSlotByIdAsync(booking.TimeSlotId);
 
-            // Tạo thông báo cho người dùng
-            await _notificationService.CreateAsync(new Notification
-            {
-                UserId = booking.UserId,
-                Title = "Đặt phòng đã hoàn thành",
-                Message = $"Yêu cầu đặt phòng {room.RoomName} vào ngày {booking.BookingDate.ToString("dd/MM/yyyy")}, khung giờ {timeSlotDto.StartTime}-{timeSlotDto.EndTime} đã được đánh dấu hoàn thành.",
-                IsRead = false,
-                BookingId = booking.BookingId,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now
-            });
+            // Gửi thông báo real-time
+            await _notificationService.NotifyBookingStatusChangeAsync(booking, "Completed");
 
             TempData["SuccessMessage"] = "Yêu cầu đặt phòng đã được đánh dấu hoàn thành.";
             return RedirectToAction(nameof(Index));
+        }
+
+        // GET: Booking/GetPendingCount
+        [HttpGet]
+        public async Task<IActionResult> GetPendingCount()
+        {
+            var bookings = await _bookingService.GetAllAsync();
+            int pendingCount = bookings.Count(b => b.Status == 1); // Status 1 = Pending
+            return Json(pendingCount);
         }
 
         // GET: Booking/Export

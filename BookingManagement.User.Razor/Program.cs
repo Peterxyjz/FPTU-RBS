@@ -1,4 +1,6 @@
 using BookingManagement.Repositories.Extensions;
+using BookingManagement.Services.Extensions;
+using BookingManagement.Services.Hubs;
 using BookingManagement.Services.Interfaces;
 using BookingManagement.Services.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -13,11 +15,24 @@ builder.Services.AddRazorPages();
 builder.Services.AddRepositories(builder.Configuration);
 
 // Đăng ký các services
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IBookingService, BookingService>();
-builder.Services.AddScoped<ITimeSlotService, TimeSlotService>();
-builder.Services.AddScoped<IRoomService, RoomService>();
-builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddApplicationServices();
+
+// Đăng ký SignalR
+builder.Services.AddSignalR();
+
+// CORS policy for SignalR
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy", policyBuilder =>
+    {
+        policyBuilder
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials()
+            .WithOrigins(builder.Configuration["AllowedOrigins"]?.Split(',') ?? new string[] { "https://localhost:5001", "https://localhost:7001" });
+    });
+});
+
 // Cấu hình Authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -57,10 +72,12 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 app.UseRouting();
-
+app.UseCors("CorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Map SignalR hub
+app.MapHub<NotificationHub>("/notificationHub");
 app.MapRazorPages();
 
 app.Run();

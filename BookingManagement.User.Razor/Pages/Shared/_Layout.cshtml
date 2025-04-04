@@ -49,14 +49,22 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-page="/RoomList/Index">Danh sách phòng</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-page="/Notification/Index">
+                            <li class="nav-item dropdown">
+                                <a class="nav-link text-dark dropdown-toggle" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     Thông báo
-                                    @if (unreadCount > 0)
-                                    {
-                                        <span class="badge bg-danger">@unreadCount</span>
-                                    }
+                                    <span id="notification-badge" class="badge bg-danger" style="display: @(unreadCount > 0 ? "inline-block" : "none")">@unreadCount</span>
                                 </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
+                                    <li>
+                                        <h6 class="dropdown-header">Thông báo</h6>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item" asp-page="/Notification/Index">
+                                            <i class="bi bi-envelope-fill me-2"></i> Xem tất cả thông báo
+                                        </a>
+                                    </li>
+                                </ul>
                             </li>
                         }
                         else
@@ -114,7 +122,21 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <!-- SignalR client -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
+    <script src="~/js/notification.js" asp-append-version="true"></script>
 
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var userIdClaim = '@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value';
+                if (userIdClaim) {
+                    initializeSignalRConnection(userIdClaim);
+                }
+            });
+        </script>
+    }
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
