@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using BookingManagement.Repositories.Models;
+using BookingManagement.Repositories.Models.TimeManagement;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.IO;
@@ -29,6 +30,12 @@ public partial class FptuRoomBookingContext : DbContext
     public virtual DbSet<TimeSlot> TimeSlots { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
+
+    public virtual DbSet<OperationalHours> OperationalHours { get; set; }
+
+    public virtual DbSet<SpecialSchedule> SpecialSchedules { get; set; }
+
+    public virtual DbSet<BlockedTimeSlot> BlockedTimeSlots { get; set; }
     private string GetConnectionString()
     {
         IConfiguration config = new ConfigurationBuilder()
@@ -218,6 +225,95 @@ public partial class FptuRoomBookingContext : DbContext
                 .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__User__RoleID__2D27B809");
+        });
+
+        // Time Management Entities
+        modelBuilder.Entity<OperationalHours>(entity =>
+        {
+            entity.HasKey(e => e.OperationalHoursId).HasName("PK__Operational__Hours");
+
+            entity.ToTable("OperationalHours");
+
+            entity.Property(e => e.OperationalHoursId).HasColumnName("OperationalHoursID");
+            entity.Property(e => e.Name).HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(255);
+            entity.Property(e => e.DaysOfWeek).HasMaxLength(50);
+            entity.Property(e => e.BuildingId).HasColumnName("BuildingID");
+            entity.Property(e => e.RoomId).HasColumnName("RoomID");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+
+            entity.HasOne(d => d.Room).WithMany()
+                .HasForeignKey(d => d.RoomId)
+                .HasConstraintName("FK__OperationalHours__RoomID");
+        });
+
+        modelBuilder.Entity<SpecialSchedule>(entity =>
+        {
+            entity.HasKey(e => e.SpecialScheduleId).HasName("PK__SpecialSchedule");
+
+            entity.ToTable("SpecialSchedule");
+
+            entity.Property(e => e.SpecialScheduleId).HasColumnName("SpecialScheduleID");
+            entity.Property(e => e.Title).HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(255);
+            entity.Property(e => e.BuildingId).HasColumnName("BuildingID");
+            entity.Property(e => e.RoomId).HasColumnName("RoomID");
+            entity.Property(e => e.StartDate).HasColumnType("datetime");
+            entity.Property(e => e.EndDate).HasColumnType("datetime");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.IsClosed).HasDefaultValue(false);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+
+            entity.HasOne(d => d.Room).WithMany()
+                .HasForeignKey(d => d.RoomId)
+                .HasConstraintName("FK__SpecialSchedule__RoomID");
+        });
+
+        modelBuilder.Entity<BlockedTimeSlot>(entity =>
+        {
+            entity.HasKey(e => e.BlockedTimeSlotId).HasName("PK__BlockedTimeSlot");
+
+            entity.ToTable("BlockedTimeSlot");
+
+            entity.Property(e => e.BlockedTimeSlotId).HasColumnName("BlockedTimeSlotID");
+            entity.Property(e => e.Reason).HasMaxLength(255);
+            entity.Property(e => e.TimeSlotId).HasColumnName("TimeSlotID");
+            entity.Property(e => e.RoomId).HasColumnName("RoomID");
+            entity.Property(e => e.StartDate).HasColumnType("datetime");
+            entity.Property(e => e.EndDate).HasColumnType("datetime");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.CreatedById).HasColumnName("CreatedByID");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+
+            entity.HasOne(d => d.TimeSlot).WithMany()
+                .HasForeignKey(d => d.TimeSlotId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__BlockedTimeSlot__TimeSlotID");
+
+            entity.HasOne(d => d.Room).WithMany()
+                .HasForeignKey(d => d.RoomId)
+                .HasConstraintName("FK__BlockedTimeSlot__RoomID");
+
+            entity.HasOne(d => d.CreatedBy).WithMany()
+                .HasForeignKey(d => d.CreatedById)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__BlockedTimeSlot__CreatedByID");
         });
 
         OnModelCreatingPartial(modelBuilder);
