@@ -76,5 +76,7 @@ app.MapControllerRoute(
     
 // Map SignalR hub
 app.MapHub<BookingHub>("/bookingHub");
+// Map tương thích với đường dẫn của user để đảm bảo kết nối chéo
+app.MapHub<BookingHub>("/notificationHub");
 
 app.Run();

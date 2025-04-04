@@ -72,5 +72,9 @@ app.MapRazorPages();
 
 // Map SignalR hub
 app.MapHub<NotificationHub>("/notificationHub");
+// Thêm tương thích với hub của admin
+app.MapHub<NotificationHub>("/bookingHub");
+
+Console.WriteLine("SignalR hubs mapped: /notificationHub and /bookingHub");
 
 app.Run();

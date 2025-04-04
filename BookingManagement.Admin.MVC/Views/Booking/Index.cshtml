@@ -55,6 +55,7 @@
                 <a asp-action="Index" asp-route-status="1" asp-route-searchString="@ViewBag.CurrentSearch" asp-route-dateFilter="@ViewBag.CurrentDate" class="btn @(ViewBag.CurrentStatus == "1" ? "btn-primary" : "btn-outline-primary")">Chờ duyệt</a>
                 <a asp-action="Index" asp-route-status="2" asp-route-searchString="@ViewBag.CurrentSearch" asp-route-dateFilter="@ViewBag.CurrentDate" class="btn @(ViewBag.CurrentStatus == "2" ? "btn-primary" : "btn-outline-primary")">Đã duyệt</a>
                 <a asp-action="Index" asp-route-status="3" asp-route-searchString="@ViewBag.CurrentSearch" asp-route-dateFilter="@ViewBag.CurrentDate" class="btn @(ViewBag.CurrentStatus == "3" ? "btn-primary" : "btn-outline-primary")">Đã từ chối</a>
+                <a asp-action="Index" asp-route-status="4" asp-route-searchString="@ViewBag.CurrentSearch" asp-route-dateFilter="@ViewBag.CurrentDate" class="btn @(ViewBag.CurrentStatus == "4" ? "btn-primary" : "btn-outline-primary")">Đã hoàn thành</a>
                 <a asp-action="Index" asp-route-status="5" asp-route-searchString="@ViewBag.CurrentSearch" asp-route-dateFilter="@ViewBag.CurrentDate" class="btn @(ViewBag.CurrentStatus == "5" ? "btn-primary" : "btn-outline-primary")">Đã hủy</a>
                     </div>
             </div>
@@ -145,12 +146,6 @@
                                         </a>
                                         <a asp-action="Reject" asp-route-id="@item.BookingId" class="btn btn-sm btn-danger">
                                             <i class="fas fa-times"></i> Từ chối
-                                        </a>
-                                    }
-                                    @if (item.Status == 2) // Chỉ hiển thị nút hoàn thành cho các yêu cầu đã duyệt
-                                    {
-                                        <a asp-action="Complete" asp-route-id="@item.BookingId" class="btn btn-sm btn-info">
-                                            <i class="fas fa-check-circle"></i> Hoàn thành
                                         </a>
                                     }
                                 </div>

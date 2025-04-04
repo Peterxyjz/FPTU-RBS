@@ -1,12 +1,17 @@
 ﻿using BookingManagement.Repositories.Models;
 using BookingManagement.Services.DTOs;
 using BookingManagement.Services.Interfaces;
+using BookingManagement.Services.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.SignalR;
 using BookingManagement.Admin.MVC.Hubs;
+using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace BookingManagement.Admin.MVC.Controllers
 {
@@ -19,6 +24,7 @@ namespace BookingManagement.Admin.MVC.Controllers
         private readonly ITimeSlotService _timeSlotService;
         private readonly INotificationService _notificationService;
         private readonly IHubContext<BookingHub> _hubContext;
+        private readonly ISignalRService _signalRService;
         private static DateTime _lastCheckTime = DateTime.Now;
 
         public BookingController(
@@ -27,7 +33,8 @@ namespace BookingManagement.Admin.MVC.Controllers
             IUserService userService,
             ITimeSlotService timeSlotService,
             INotificationService notificationService,
-            IHubContext<BookingHub> hubContext)
+            IHubContext<BookingHub> hubContext,
+            ISignalRService signalRService)
         {
             _bookingService = bookingService;
             _roomService = roomService;
@@ -35,6 +42,7 @@ namespace BookingManagement.Admin.MVC.Controllers
             _timeSlotService = timeSlotService;
             _notificationService = notificationService;
             _hubContext = hubContext;
+            _signalRService = signalRService;
         }
 
         // GET: Booking
@@ -70,6 +78,10 @@ namespace BookingManagement.Admin.MVC.Controllers
             bookings = bookings.OrderByDescending(b => b.CreatedAt)
                                .ThenBy(b => b.Status);
 
+            // Log số lượng booking có status = 2 (Đã duyệt)
+            var approvedBookingCount = bookings.Count(b => b.Status == 2);
+            Console.WriteLine($"Số lượng booking đã duyệt (status = 2): {approvedBookingCount}");
+
             // Lưu các giá trị filter cho view
             ViewBag.CurrentStatus = status;
             ViewBag.CurrentSearch = searchString;
@@ -103,6 +115,31 @@ namespace BookingManagement.Admin.MVC.Controllers
             }
             
             return Json(hasNewBookings);
+        }
+
+        // API: Booking/TestNotification - Test sending notification to a user
+        [HttpGet]
+        public async Task<IActionResult> TestNotification(int userId)
+        {
+            // Send a test notification to the user
+            try
+            {
+                var message = $"This is a test notification for user {userId} at {DateTime.Now.ToString("HH:mm:ss")}";
+                
+                // Send test notification using multiple methods
+                await _hubContext.Clients.All.SendAsync("ReceiveNotification", message);
+                await _hubContext.Clients.Group(userId.ToString()).SendAsync("ReceiveNotification", message);
+                await _hubContext.Clients.Group(userId.ToString()).SendAsync("ReceiveBookingApproval", message, 123);
+                
+                Console.WriteLine($"Test notification sent to user {userId}: {message}");
+                
+                return Json(new { success = true, message = $"Test notification sent to user {userId}" });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error sending test notification: {ex.Message}");
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
         }
 
         // GET: Booking/Details/5
@@ -176,9 +213,20 @@ namespace BookingManagement.Admin.MVC.Controllers
             
             await _notificationService.CreateAsync(notification);
             
-            // Gửi thông báo real-time cho user
-            await _hubContext.Clients.Group(booking.UserId.ToString())
-                .SendAsync("ReceiveBookingApproval", notification.Message, booking.BookingId);
+            // Gửi thông báo real-time cho user - thử cả hai cách
+            try {
+                // Cách 1: Sử dụng service
+                await _signalRService.SendBookingStatusUpdateAsync(booking, notification.Message);
+                
+                // Cách 2: Gọi trực tiếp tới hub
+                await _hubContext.Clients.All.SendAsync("ReceiveNotification", notification.Message);
+                await _hubContext.Clients.Group(booking.UserId.ToString())
+                    .SendAsync("ReceiveBookingApproval", notification.Message, booking.BookingId);
+                
+                Console.WriteLine($"Đã gửi thông báo phê duyệt tới user {booking.UserId}: {notification.Message}");
+            } catch (Exception ex) {
+                Console.WriteLine($"Lỗi khi gửi thông báo: {ex.Message}");
+            }
 
             TempData["SuccessMessage"] = "Yêu cầu đặt phòng đã được phê duyệt thành công.";
             return RedirectToAction(nameof(Index));
@@ -244,9 +292,20 @@ namespace BookingManagement.Admin.MVC.Controllers
             
             await _notificationService.CreateAsync(notification);
             
-            // Gửi thông báo real-time cho user
-            await _hubContext.Clients.Group(booking.UserId.ToString())
-                .SendAsync("ReceiveBookingRejection", notification.Message, booking.BookingId);
+            // Gửi thông báo real-time cho user - thử cả hai cách
+            try {
+                // Cách 1: Sử dụng service
+                await _signalRService.SendBookingStatusUpdateAsync(booking, notification.Message);
+                
+                // Cách 2: Gọi trực tiếp tới hub
+                await _hubContext.Clients.All.SendAsync("ReceiveNotification", notification.Message);
+                await _hubContext.Clients.Group(booking.UserId.ToString())
+                    .SendAsync("ReceiveBookingRejection", notification.Message, booking.BookingId);
+                
+                Console.WriteLine($"Đã gửi thông báo từ chối tới user {booking.UserId}: {notification.Message}");
+            } catch (Exception ex) {
+                Console.WriteLine($"Lỗi khi gửi thông báo: {ex.Message}");
+            }
 
             TempData["SuccessMessage"] = "Yêu cầu đặt phòng đã bị từ chối.";
             return RedirectToAction(nameof(Index));
@@ -311,9 +370,20 @@ namespace BookingManagement.Admin.MVC.Controllers
             
             await _notificationService.CreateAsync(notification);
             
-            // Gửi thông báo real-time cho user
-            await _hubContext.Clients.Group(booking.UserId.ToString())
-                .SendAsync("ReceiveBookingCompletion", notification.Message, booking.BookingId);
+            // Gửi thông báo real-time cho user - thử cả hai cách
+            try {
+                // Cách 1: Sử dụng service
+                await _signalRService.SendBookingStatusUpdateAsync(booking, notification.Message);
+                
+                // Cách 2: Gọi trực tiếp tới hub
+                await _hubContext.Clients.All.SendAsync("ReceiveNotification", notification.Message);
+                await _hubContext.Clients.Group(booking.UserId.ToString())
+                    .SendAsync("ReceiveBookingCompletion", notification.Message, booking.BookingId);
+                
+                Console.WriteLine($"Đã gửi thông báo hoàn thành tới user {booking.UserId}: {notification.Message}");
+            } catch (Exception ex) {
+                Console.WriteLine($"Lỗi khi gửi thông báo: {ex.Message}");
+            }
 
             TempData["SuccessMessage"] = "Yêu cầu đặt phòng đã được đánh dấu hoàn thành.";
             return RedirectToAction(nameof(Index));

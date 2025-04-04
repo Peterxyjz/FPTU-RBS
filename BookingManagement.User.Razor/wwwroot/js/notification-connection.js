@@ -11,6 +11,7 @@ const currentUserId = document.getElementById('current-user-id')?.value;
 
 // Bắt sự kiện ReceiveNotification
 connection.on("ReceiveNotification", (message) => {
+    console.log("Received notification: " + message);
     // Hiển thị thông báo
     toastr.info(message);
     
@@ -25,30 +26,54 @@ connection.on("ReceiveNotification", (message) => {
 
 // Bắt sự kiện trạng thái đặt phòng
 connection.on("ReceiveBookingApproval", (message, bookingId) => {
+    console.log("Received booking approval: " + message);
     toastr.success(message);
     
     // Nếu đang ở trang BookingRoom, thì cập nhật danh sách
     if (window.location.pathname.includes('/BookingRoom')) {
-        location.reload();
+        // Delay reload để đảm bảo toản thông báo được hiển thị
+        setTimeout(() => {
+            console.log("Reloading page after booking approval");
+            location.reload();
+        }, 1000);
     }
+    
+    // Phát âm thanh thông báo
+    playNotificationSound();
 });
 
 connection.on("ReceiveBookingRejection", (message, bookingId) => {
+    console.log("Received booking rejection: " + message);
     toastr.warning(message);
     
     // Nếu đang ở trang BookingRoom, thì cập nhật danh sách
     if (window.location.pathname.includes('/BookingRoom')) {
-        location.reload();
+        // Delay reload để đảm bảo toản thông báo được hiển thị
+        setTimeout(() => {
+            console.log("Reloading page after booking rejection");
+            location.reload();
+        }, 1000);
     }
+    
+    // Phát âm thanh thông báo
+    playNotificationSound();
 });
 
 connection.on("ReceiveBookingCompletion", (message, bookingId) => {
+    console.log("Received booking completion: " + message);
     toastr.info(message);
     
     // Nếu đang ở trang BookingRoom, thì cập nhật danh sách
     if (window.location.pathname.includes('/BookingRoom')) {
-        location.reload();
+        // Delay reload để đảm bảo toản thông báo được hiển thị
+        setTimeout(() => {
+            console.log("Reloading page after booking completion");
+            location.reload();
+        }, 1000);
     }
+    
+    // Phát âm thanh thông báo
+    playNotificationSound();
 });
 
 // Khởi động kết nối
@@ -59,11 +84,15 @@ async function startConnection() {
         
         // Nếu có userId, join vào nhóm riêng
         if (currentUserId) {
-            await connection.invoke("JoinGroup", currentUserId);
-            console.log("Joined user group: " + currentUserId);
+            try {
+                await connection.invoke("JoinGroup", currentUserId);
+                console.log("Joined user group: " + currentUserId);
+            } catch (err) {
+                console.error("Error joining group: ", err);
+            }
         }
     } catch (err) {
-        console.error(err);
+        console.error("SignalR Connection Error: ", err);
         setTimeout(startConnection, 5000);
     }
 }
@@ -90,6 +119,30 @@ function updateUnreadNotificationCount() {
     }
 }
 
+// Hàm phát âm thanh thông báo
+function playNotificationSound() {
+    try {
+        // Tạo một âm thanh đơn giản
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 800;
+        gainNode.gain.value = 0.3;
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.start(0);
+        oscillator.stop(0.1);
+        
+        console.log("Notification sound played");
+    } catch (err) {
+        console.error("Error playing notification sound:", err);
+    }
+}
+
 // Khởi động kết nối khi trang được tải
 $(document).ready(function () {
     startConnection();
@@ -97,7 +150,7 @@ $(document).ready(function () {
     // Khởi tạo toastr
     toastr.options = {
         "closeButton": true,
-        "debug": false,
+        "debug": true,
         "newestOnTop": true,
         "progressBar": true,
         "positionClass": "toast-top-right",

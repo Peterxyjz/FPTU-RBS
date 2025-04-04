@@ -2,6 +2,7 @@ using BookingManagement.Admin.MVC.Hubs;
 using BookingManagement.Repositories.Models;
 using BookingManagement.Repositories.UnitOfWork;
 using BookingManagement.Services.Interfaces;
+using BookingManagement.Services.Shared;
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Threading.Tasks;
@@ -56,8 +57,32 @@ namespace BookingManagement.Admin.MVC.Services
                 throw new ArgumentException("Message cannot be null or empty", nameof(message));
             }
 
+            // Phương thức này sẽ gửi các sự kiện cụ thể dựa trên status của booking
+            switch (booking.Status)
+            {
+                case BookingStatus.Approved: // Đã duyệt
+                    await _hubContext.Clients.Group(booking.UserId.ToString())
+                        .SendAsync("ReceiveBookingApproval", message, booking.BookingId);
+                    break;
+                case BookingStatus.Rejected: // Từ chối
+                    await _hubContext.Clients.Group(booking.UserId.ToString())
+                        .SendAsync("ReceiveBookingRejection", message, booking.BookingId);
+                    break;
+                case BookingStatus.Completed: // Đã hoàn thành
+                    await _hubContext.Clients.Group(booking.UserId.ToString())
+                        .SendAsync("ReceiveBookingCompletion", message, booking.BookingId);
+                    break;
+                default:
+                    await _hubContext.Clients.Group(booking.UserId.ToString())
+                        .SendAsync("ReceiveNotification", message);
+                    break;
+            }
+
+            // Gửi thêm một thông báo chung để đảm bảo khả năng nhận
             await _hubContext.Clients.Group(booking.UserId.ToString())
-                .SendAsync("ReceiveBookingStatusUpdate", message, booking.BookingId);
+                .SendAsync("ReceiveNotification", message);
+            
+            Console.WriteLine($"Sent notification to user {booking.UserId}: {message}");
         }
     }
 }

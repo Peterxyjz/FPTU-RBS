@@ -26,6 +26,13 @@ function startConnection() {
     connection.start()
         .then(() => {
             console.log("SignalR Connected successfully!");
+            // Join group chứa admin ID nếu có
+            var adminId = document.getElementById('current-admin-id')?.value;
+            if (adminId) {
+                connection.invoke("JoinUserGroup", adminId)
+                    .then(() => console.log("Admin joined group: " + adminId))
+                    .catch(err => console.error("Error joining admin group: ", err));
+            }
         })
         .catch(err => {
             console.error("Error connecting to SignalR:", err);
