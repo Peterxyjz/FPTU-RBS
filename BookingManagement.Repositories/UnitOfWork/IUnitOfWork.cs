@@ -12,6 +12,9 @@ namespace BookingManagement.Repositories.UnitOfWork
         ITimeSlotRepository TimeSlots { get; }
         INotificationRepository Notifications { get; }
         IRoleRepository Roles { get; }
+        IOperationalHoursRepository OperationalHours { get; }
+        ISpecialScheduleRepository SpecialSchedules { get; }
+        IBlockedTimeSlotRepository BlockedTimeSlots { get; }
         
         Task<int> CompleteAsync();
     }
