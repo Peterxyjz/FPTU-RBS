@@ -1,5 +1,6 @@
 using BookingManagement.Repositories.Extensions;
 using BookingManagement.Repositories.Interfaces;
+using BookingManagement.Services.Extensions;
 using BookingManagement.Services.Interfaces;
 using BookingManagement.Services.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -14,9 +15,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddRepositories(builder.Configuration);
 
 // Đăng ký các services
-builder.Services.AddScoped<BookingManagement.Services.Interfaces.IAuthService, BookingManagement.Services.Services.AuthService>();
-builder.Services.AddScoped<BookingManagement.Services.Interfaces.IUserService, BookingManagement.Services.Services.UserService>();
-builder.Services.AddScoped<BookingManagement.Services.Interfaces.IRoomService, BookingManagement.Services.Services.RoomService>();
+// Add all application services
+builder.Services.AddApplicationServices();
 
 // Đăng ký SignalR
 builder.Services.AddSignalR();

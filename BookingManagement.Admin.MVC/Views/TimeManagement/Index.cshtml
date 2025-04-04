@@ -1,0 +1,58 @@
+@{
+    ViewData["Title"] = "Time Management";
+}
+
+<div class="container-fluid">
+    <h1 class="my-4">Time Management Dashboard</h1>
+
+    <div class="row mb-5">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Operational Hours</h5>
+                    <p class="card-text">Manage operational hours for buildings and rooms. Set standard opening and closing times.</p>
+                    <a asp-action="OperationalHours" class="btn btn-primary">Manage Operational Hours</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Special Schedules</h5>
+                    <p class="card-text">Create special schedules for holidays, events, or maintenance periods.</p>
+                    <a asp-action="SpecialSchedules" class="btn btn-primary">Manage Special Schedules</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Blocked Time Slots</h5>
+                    <p class="card-text">Block specific time slots for maintenance, events, or administrative purposes.</p>
+                    <a asp-action="BlockedTimeSlots" class="btn btn-primary">Manage Blocked Time Slots</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Time Management Overview</h5>
+                </div>
+                <div class="card-body">
+                    <p>The time management module allows administrators to:</p>
+                    <ul>
+                        <li><strong>Set operational hours</strong> - Define when buildings and rooms are available for booking</li>
+                        <li><strong>Create special schedules</strong> - Set custom opening hours or closures for holidays and events</li>
+                        <li><strong>Block time slots</strong> - Prevent specific time slots from being booked for maintenance or special purposes</li>
+                    </ul>
+                    <p>Use these features to ensure efficient use of campus spaces while accommodating special circumstances and maintenance needs.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

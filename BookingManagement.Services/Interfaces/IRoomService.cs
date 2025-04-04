@@ -10,6 +10,7 @@ namespace BookingManagement.Services.Interfaces
 {
     public interface IRoomService
     {
+        Task<IEnumerable<RoomDto>> GetActiveRoomsAsync();
         Task<IEnumerable<Room>> GetAllRoomsAsync();
         Task<Room?> GetRoomByIdAsync(int id);
         Task<Room?> AddRoomAsync(Room room);

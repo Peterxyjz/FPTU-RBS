@@ -1,3 +1,4 @@
+       
 // File: BookingManagement.Services/Services/RoomService.cs
 using BookingManagement.Repositories.Interfaces;
 using BookingManagement.Repositories.Models;
@@ -23,6 +24,23 @@ namespace BookingManagement.Services.Services
         {
             _unitOfWork = unitOfWork;
             _roomRepository = roomRepository;
+        }
+
+        public async Task<IEnumerable<RoomDto>> GetActiveRoomsAsync()
+        {
+            var rooms = await _roomRepository.GetRoomsByStatusAsync(1); // Status 1 is Active
+            return rooms.Select(r => new RoomDto
+            {
+                RoomNumber = r.RoomId,
+                RoomName = r.RoomName,
+                Building = r.Building,
+                Capacity = r.Capacity,
+                RoomType = r.RoomType,
+                Description = r.Description,
+                Status = r.Status,
+                ImageUrl = r.ImageUrl,
+                IsActive = r.IsActive == true
+            });
         }
 
         public async Task<Room?> AddRoomAsync(Room room)
