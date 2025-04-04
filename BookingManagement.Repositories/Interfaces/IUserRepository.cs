@@ -9,5 +9,6 @@ namespace BookingManagement.Repositories.Interfaces
         Task<User?> GetByEmailAsync(string email);
         Task<bool> IsEmailExistsAsync(string email);
         Task<IEnumerable<User>> GetUsersByRoleAsync(int roleId);
+        Task<IEnumerable<User>> GetUsersByRoleIdAsync(int roleId);
     }
 }

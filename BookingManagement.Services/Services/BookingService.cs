@@ -3,21 +3,25 @@ using BookingManagement.Repositories.Interfaces;
 using BookingManagement.Repositories.Models;
 using BookingManagement.Repositories.UnitOfWork;
 using BookingManagement.Services.Interfaces;
+using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BookingManagement.Services.Hubs;
 
 namespace BookingManagement.Services.Services
 {
     public class BookingService : IBookingService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly INotificationService _notificationService;
 
-        public BookingService(IUnitOfWork unitOfWork)
+        public BookingService(IUnitOfWork unitOfWork, INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
+            _notificationService = notificationService;
         }
 
         public async Task<IEnumerable<Booking>> GetAllAsync()
@@ -90,25 +94,8 @@ namespace BookingManagement.Services.Services
                 await _unitOfWork.Bookings.AddAsync(booking);
                 await _unitOfWork.CompleteAsync();
 
-                // Create notification after successful booking
-
-                // Get room and time slot information for the notification message
-                var room = await _unitOfWork.Rooms.GetByIdAsync(booking.RoomId);
-                var timeSlot = await _unitOfWork.TimeSlots.GetByIdAsync(booking.TimeSlotId);
-
-                var notification = new Notification
-                {
-                    UserId = booking.UserId,
-                    Title = "Đặt phòng thành công",
-                    Message = $"Bạn đã đặt phòng {room.RoomName} vào ngày {booking.BookingDate.ToString("dd/MM/yyyy")}, khung giờ {timeSlot.StartTime}-{timeSlot.EndTime}. Hãy chờ xác nhận từ quản trị viên.",
-                    IsRead = false,
-                    BookingId = booking.BookingId,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now
-                };
-
-                await _unitOfWork.Notifications.AddAsync(notification);
-                await _unitOfWork.CompleteAsync();
+                // Gửi thông báo real-time cho người dùng và admin
+                await _notificationService.NotifyNewBookingAsync(booking);
 
                 return booking;
             }
@@ -192,55 +179,47 @@ namespace BookingManagement.Services.Services
                 booking.UpdatedAt = DateTime.Now;
                 await _unitOfWork.Bookings.UpdateAsync(booking);
 
-                // Lấy thông tin phòng và khung giờ mới cho thông báo
+                // Get room and time slot information
                 var room = await _unitOfWork.Rooms.GetByIdAsync(booking.RoomId);
                 var timeSlot = await _unitOfWork.TimeSlots.GetByIdAsync(booking.TimeSlotId);
-
-                var notification = new Notification
+                
+                string title;
+                string message;
+                
+                // Determine notification content based on change type
+                if (oldStatus != booking.Status)
                 {
-                    UserId = booking.UserId,
-                    Title = "Đặt phòng đã được cập nhật",
-                    Message = $"Đặt phòng của bạn cho phòng {room.RoomName} đã được thay đổi thành ngày {booking.BookingDate.ToString("dd/MM/yyyy")}, khung giờ {timeSlot.StartTime}-{timeSlot.EndTime}.",
-                    IsRead = false,
-                    BookingId = booking.BookingId,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now
-                };
-
-                //string title;
-                //string message;
-
-                //// Xác định nội dung thông báo dựa trên loại thay đổi
-                //if (oldStatus != booking.Status)
-                //{
-                //    title = GetStatusChangeTitle(booking.Status);
-                //    message = GetStatusChangeMessage(booking.Status, room.RoomName, booking.BookingDate, timeSlot);
-                //}
-                //else if (oldBookingDate != booking.BookingDate || oldTimeSlotId != booking.TimeSlotId)
-                //{
-                //    title = "Đặt phòng đã được cập nhật";
-                //    message = $"Đặt phòng của bạn cho phòng {room.RoomName} đã được thay đổi thành ngày {booking.BookingDate.ToString("dd/MM/yyyy")}, khung giờ {timeSlot.StartTime}-{timeSlot.EndTime}.";
-                //}
-                //else
-                //{
-                //    // Luôn tạo thông báo khi có bất kỳ cập nhật nào
-                //    title = "Đặt phòng đã được cập nhật";
-                //    message = $"Đặt phòng của bạn cho phòng {room.RoomName} đã được cập nhật thành công.";
-                //}
-
-                //// Tạo thông báo
-                //var notification = new Notification
-                //{
-                //    UserId = booking.UserId,
-                //    Title = title,
-                //    Message = message,
-                //    IsRead = false,
-                //    BookingId = booking.BookingId,
-                //    CreatedAt = DateTime.Now,
-                //    UpdatedAt = DateTime.Now
-                //};
-
-                await _unitOfWork.Notifications.AddAsync(notification);
+                    title = GetStatusChangeTitle(booking.Status);
+                    message = GetStatusChangeMessage(booking.Status, room.RoomName, booking.BookingDate, timeSlot);
+                    
+                    // Notify of status change
+                    await _notificationService.NotifyBookingStatusChangeAsync(booking, GetStatusText(booking.Status));
+                }
+                else if (oldBookingDate != booking.BookingDate || oldTimeSlotId != booking.TimeSlotId)
+                {
+                    title = "Đặt phòng đã được cập nhật";
+                    message = $"Đặt phòng của bạn cho phòng {room.RoomName} đã được thay đổi thành ngày {booking.BookingDate.ToString("dd/MM/yyyy")}, khung giờ {timeSlot.StartTime}-{timeSlot.EndTime}.";
+                    
+                    // Send update notification
+                    await _notificationService.SendNotificationToUserAsync(
+                        booking.UserId,
+                        title,
+                        message,
+                        booking.BookingId);
+                }
+                else
+                {
+                    // Always create notification for any update
+                    title = "Đặt phòng đã được cập nhật";
+                    message = $"Đặt phòng của bạn cho phòng {room.RoomName} đã được cập nhật thành công.";
+                    
+                    // Send generic update notification
+                    await _notificationService.SendNotificationToUserAsync(
+                        booking.UserId,
+                        title,
+                        message,
+                        booking.BookingId);
+                }
 
                 // Commit tất cả các thay đổi trong một transaction
                 await _unitOfWork.CompleteAsync();
@@ -263,6 +242,19 @@ namespace BookingManagement.Services.Services
                 case 4: return "Đặt phòng đã hoàn thành";
                 case 5: return "Đặt phòng đã bị hủy";
                 default: return "Cập nhật trạng thái đặt phòng";
+            }
+        }
+        
+        private string GetStatusText(int status)
+        {
+            switch (status)
+            {
+                case 1: return "Pending";
+                case 2: return "Approved";
+                case 3: return "Rejected";
+                case 4: return "Completed";
+                case 5: return "Cancelled";
+                default: return "Unknown";
             }
         }
 
@@ -309,24 +301,8 @@ namespace BookingManagement.Services.Services
                 await _unitOfWork.Bookings.UpdateAsync(booking);
                 await _unitOfWork.CompleteAsync();
 
-                // Get room and time slot information for the notification message
-                var room = await _unitOfWork.Rooms.GetByIdAsync(booking.RoomId);
-                var timeSlot = await _unitOfWork.TimeSlots.GetByIdAsync(booking.TimeSlotId);
-
-                // Create notification for cancellation
-                var notification = new Notification
-                {
-                    UserId = booking.UserId,
-                    Title = "Đặt phòng đã hủy",
-                    Message = $"Đặt phòng của bạn cho phòng {room.RoomName} vào ngày {booking.BookingDate.ToString("dd/MM/yyyy")}, khung giờ {timeSlot.StartTime}-{timeSlot.EndTime} đã bị hủy.",
-                    IsRead = false,
-                    BookingId = booking.BookingId,
-                    CreatedAt = DateTime.Now,
-                    UpdatedAt = DateTime.Now
-                };
-
-                await _unitOfWork.Notifications.AddAsync(notification);
-                await _unitOfWork.CompleteAsync();
+                // Notify cancellation using real-time notification
+                await _notificationService.NotifyBookingStatusChangeAsync(booking, "Cancelled");
             }
             catch (Exception)
             {

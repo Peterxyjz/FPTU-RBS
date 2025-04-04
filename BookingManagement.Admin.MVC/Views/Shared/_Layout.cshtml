@@ -311,6 +311,25 @@
                 <!-- Navbar items on the right -->
                 <ul class="navbar-nav ms-auto">
                     <partial name="_LoginPartial" />
+
+                    <!-- Notifications Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-bell-fill"></i>
+                            <span class="badge bg-danger" id="notification-badge" style="display: none;">0</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown">
+                            <li>
+                                <h6 class="dropdown-header">Thông báo</h6>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" asp-controller="Notification" asp-action="Index">
+                                    <i class="bi bi-envelope-fill me-2"></i> Xem tất cả thông báo
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </nav>
@@ -326,6 +345,9 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+    <!-- SignalR client -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
+    <script src="~/js/notification.js" asp-append-version="true"></script>
     
     <script>
         $(document).ready(function() {
@@ -367,6 +389,12 @@
             $('#toggleSidebar, #mobileToggle').on('click', function() {
                 setTimeout(updateTooltips, 300);
             });
+            
+            // Initialize SignalR connection
+            var userIdClaim = '@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value';
+            if (userIdClaim) {
+                initializeSignalRConnection();
+            }
         });
     </script>
     

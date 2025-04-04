@@ -11,5 +11,11 @@ namespace BookingManagement.Services.Interfaces
         Task<bool> MarkAsReadAsync(int notificationId);
         Task<Notification> AddAsync(Notification notification);
         Task<Notification> CreateAsync(Notification notification);
+        
+        // New methods for SignalR real-time notifications
+        Task SendNotificationToUserAsync(int userId, string title, string message, int? bookingId = null);
+        Task SendNotificationToAdminsAsync(string title, string message, int? bookingId = null);
+        Task NotifyBookingStatusChangeAsync(Booking booking, string statusText);
+        Task NotifyNewBookingAsync(Booking booking);
     }
 }

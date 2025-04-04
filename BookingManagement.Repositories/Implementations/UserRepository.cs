@@ -36,6 +36,14 @@ namespace BookingManagement.Repositories.Implementations
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<User>> GetUsersByRoleIdAsync(int roleId)
+        {
+            return await _context.Users
+                .Include(u => u.Role)
+                .Where(u => u.RoleId == roleId)
+                .ToListAsync();
+        }
+
         public override async Task<User?> GetByIdAsync(int id)
         {
             return await _context.Users
