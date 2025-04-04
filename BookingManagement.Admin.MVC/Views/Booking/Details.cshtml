@@ -1,0 +1,121 @@
+﻿@model BookingManagement.Repositories.Models.Booking
+
+@{
+    ViewData["Title"] = "Chi tiết đặt phòng";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Chi tiết đặt phòng</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/Home">Trang chủ</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Quản lý đặt phòng</a></li>
+        <li class="breadcrumb-item active">Chi tiết</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-info-circle me-1"></i>
+            Thông tin chi tiết yêu cầu đặt phòng #@Model.BookingId
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="card-title">Thông tin đặt phòng</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4">Mã đặt phòng:</dt>
+                        <dd class="col-sm-8">@Model.BookingId</dd>
+
+                        <dt class="col-sm-4">Ngày đặt:</dt>
+                        <dd class="col-sm-8">@Model.BookingDate.ToString("dd/MM/yyyy")</dd>
+
+                        <dt class="col-sm-4">Khung giờ:</dt>
+                        <dd class="col-sm-8">@Model.TimeSlot.StartTime.ToString("HH:mm") - @Model.TimeSlot.EndTime.ToString("HH:mm")</dd>
+
+                        <dt class="col-sm-4">Trạng thái:</dt>
+                        <dd class="col-sm-8">
+                            @switch (Model.Status)
+                            {
+                                case 0:
+                                    <span class="badge bg-warning text-dark">Chờ duyệt</span>
+                                    break;
+                                case 1:
+                                    <span class="badge bg-success">Đã duyệt</span>
+                                    break;
+                                case 2:
+                                    <span class="badge bg-info">Đã hoàn thành</span>
+                                    break;
+                                case 3:
+                                    <span class="badge bg-danger">Từ chối</span>
+                                    break;
+                                case 4:
+                                    <span class="badge bg-secondary">Đã hủy</span>
+                                    break;
+                                default:
+                                    <span class="badge bg-dark">@Model.Status</span>
+                                    break;
+                            }
+                        </dd>
+
+                        @if (Model.Status == 3 && !string.IsNullOrEmpty(Model.RejectReason))
+                        {
+                            <dt class="col-sm-4">Lý do từ chối:</dt>
+                            <dd class="col-sm-8">@Model.RejectReason</dd>
+                        }
+
+                        <dt class="col-sm-4">Ngày tạo:</dt>
+                        <dd class="col-sm-8">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")</dd>
+
+                        <dt class="col-sm-4">Cập nhật lần cuối:</dt>
+                        <dd class="col-sm-8">@Model.UpdatedAt.ToString("dd/MM/yyyy HH:mm:ss")</dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="card-title">Thông tin phòng</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4">Mã phòng:</dt>
+                        <dd class="col-sm-8">@Model.Room.RoomId</dd>
+
+                        <dt class="col-sm-4">Tên phòng:</dt>
+                        <dd class="col-sm-8">@Model.Room.RoomName</dd>
+
+                        <dt class="col-sm-4">Loại phòng:</dt>
+                        <dd class="col-sm-8">@Model.Room.RoomType</dd>
+
+                        <dt class="col-sm-4">Tòa nhà:</dt>
+                        <dd class="col-sm-8">@Model.Room.Building</dd>
+
+                        <dt class="col-sm-4">Sức chứa:</dt>
+                        <dd class="col-sm-8">@Model.Room.Capacity người</dd>
+                    </dl>
+
+                    <h5 class="card-title mt-4">Thông tin người đặt</h5>
+                    <dl class="row">
+                        <dt class="col-sm-4">Họ tên:</dt>
+                        <dd class="col-sm-8">@Model.User.FullName</dd>
+
+                        <dt class="col-sm-4">Email:</dt>
+                        <dd class="col-sm-8">@Model.User.Email</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Quay lại danh sách
+                </a>
+                <div>
+                    @if (Model.Status == 0) // Chỉ hiển thị nút duyệt/từ chối cho các yêu cầu đang chờ duyệt
+                    {
+                        <a asp-action="Approve" asp-route-id="@Model.BookingId" class="btn btn-success">
+                            <i class="fas fa-check"></i> Phê duyệt
+                        </a>
+                        <a asp-action="Reject" asp-route-id="@Model.BookingId" class="btn btn-danger">
+                            <i class="fas fa-times"></i> Từ chối
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

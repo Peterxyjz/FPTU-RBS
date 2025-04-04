@@ -262,18 +262,13 @@
                 <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "Booking" ? "active" : "")" asp-controller="Booking" asp-action="Index">
                     <i class="bi bi-calendar-check-fill sidebar-icon"></i>
                     <span class="nav-text">Quản lý đặt phòng</span>
+                    @await Component.InvokeAsync("PendingBookingsCount")
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "TimeSlot" ? "active" : "")" asp-controller="TimeSlot" asp-action="Index">
                     <i class="bi bi-clock-fill sidebar-icon"></i>
                     <span class="nav-text">Quản lý khung giờ</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "TimeManagement" ? "active" : "")" asp-controller="TimeManagement" asp-action="Index">
-                    <i class="bi bi-calendar2-week-fill sidebar-icon"></i>
-                    <span class="nav-text">Quản lý thời gian</span>
                 </a>
             </li>
         </ul>

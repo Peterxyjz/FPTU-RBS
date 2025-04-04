@@ -29,6 +29,11 @@ namespace BookingManagement.Services.Services
             return result;
         }
 
+        public async Task<Notification> CreateAsync(Notification notification)
+        {
+            return await AddAsync(notification);
+        }
+
         public async Task<IEnumerable<Notification>> GetNotificationsByUserIdAsync(int userId)
         {
             return await _unitOfWork.Notifications.GetNotificationsByUserIdAsync(userId);

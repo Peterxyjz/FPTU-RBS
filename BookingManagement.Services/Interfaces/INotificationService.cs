@@ -10,5 +10,6 @@ namespace BookingManagement.Services.Interfaces
         Task<int> MarkAllAsReadAsync(int userId);
         Task<bool> MarkAsReadAsync(int notificationId);
         Task<Notification> AddAsync(Notification notification);
+        Task<Notification> CreateAsync(Notification notification);
     }
 }
