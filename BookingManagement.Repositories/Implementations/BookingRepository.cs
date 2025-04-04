@@ -95,7 +95,7 @@ namespace BookingManagement.Repositories.Implementations
                 .AnyAsync(b => b.RoomId == roomId &&
                                b.BookingDate == dateOnly &&
                                b.TimeSlotId == timeSlotId &&
-                               (b.Status == 1 || b.Status == 2)); // Pending or Approved
+                               (b.Status == 2 || b.Status == 4)); // Approved or Completed
         }
 
         public override async Task<Booking?> GetByIdAsync(int id)

@@ -1,0 +1,169 @@
+﻿@model IEnumerable<BookingManagement.Repositories.Models.Booking>
+
+@{
+    ViewData["Title"] = "Quản lý đặt phòng";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Quản lý đặt phòng</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/Home">Trang chủ</a></li>
+        <li class="breadcrumb-item active">Quản lý đặt phòng</li>
+    </ol>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-table me-1"></i>
+                Danh sách yêu cầu đặt phòng
+            </div>
+            <div>
+                <a asp-action="Export" asp-route-status="@ViewBag.CurrentStatus" asp-route-searchString="@ViewBag.CurrentSearch" asp-route-dateFilter="@ViewBag.CurrentDate" class="btn btn-success btn-sm">
+                    <i class="fas fa-file-excel"></i> Xuất CSV
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+            <div class="col-md-6 mb-3">
+            <div class="btn-group" role="group" aria-label="Lọc theo trạng thái">
+                <a asp-action="Index" asp-route-status="all" asp-route-searchString="@ViewBag.CurrentSearch" asp-route-dateFilter="@ViewBag.CurrentDate" class="btn @(ViewBag.CurrentStatus == "all" ? "btn-primary" : "btn-outline-primary")">Tất cả</a>
+                <a asp-action="Index" asp-route-status="1" asp-route-searchString="@ViewBag.CurrentSearch" asp-route-dateFilter="@ViewBag.CurrentDate" class="btn @(ViewBag.CurrentStatus == "1" ? "btn-primary" : "btn-outline-primary")">Chờ duyệt</a>
+                <a asp-action="Index" asp-route-status="2" asp-route-searchString="@ViewBag.CurrentSearch" asp-route-dateFilter="@ViewBag.CurrentDate" class="btn @(ViewBag.CurrentStatus == "2" ? "btn-primary" : "btn-outline-primary")">Đã duyệt</a>
+                <a asp-action="Index" asp-route-status="3" asp-route-searchString="@ViewBag.CurrentSearch" asp-route-dateFilter="@ViewBag.CurrentDate" class="btn @(ViewBag.CurrentStatus == "3" ? "btn-primary" : "btn-outline-primary")">Đã từ chối</a>
+                <a asp-action="Index" asp-route-status="5" asp-route-searchString="@ViewBag.CurrentSearch" asp-route-dateFilter="@ViewBag.CurrentDate" class="btn @(ViewBag.CurrentStatus == "5" ? "btn-primary" : "btn-outline-primary")">Đã hủy</a>
+                    </div>
+            </div>
+            <div class="col-md-6">
+                <form asp-action="Index" method="get" class="row g-3">
+                    <input type="hidden" name="status" value="@ViewBag.CurrentStatus" />
+                    <div class="col-md-5">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="searchString" value="@ViewBag.CurrentSearch" placeholder="Tìm kiếm phòng, người dùng..." />
+                            <button type="submit" class="btn btn-outline-secondary">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="input-group">
+                            <input type="date" class="form-control" name="dateFilter" value="@ViewBag.CurrentDate" />
+                            <button type="submit" class="btn btn-outline-secondary">
+                                <i class="bi bi-calendar"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <a asp-action="Index" class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-x-circle"></i> Đặt lại
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+            <table class="table table-bordered table-striped" id="bookingsTable">
+                <thead>
+                    <tr>
+                        <th>Mã đặt phòng</th>
+                        <th>Người đặt</th>
+                        <th>Phòng</th>
+                        <th>Ngày đặt</th>
+                        <th>Khung giờ</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.BookingId</td>
+                            <td>@item.User.FullName</td>
+                            <td>@item.Room.RoomName</td>
+                            <td>@item.BookingDate.ToString("dd/MM/yyyy")</td>
+                            <td>@item.TimeSlot.StartTime.ToString("HH:mm") - @item.TimeSlot.EndTime.ToString("HH:mm")</td>
+                            <td>
+                                @switch (item.Status)
+                                {
+                                    case 1:
+                                        <span class="badge bg-warning text-dark">Chờ duyệt</span>
+                                        break;
+                                    case 2:
+                                        <span class="badge bg-success">Đã duyệt</span>
+                                        break;
+                                    case 3:
+                                        <span class="badge bg-danger">Từ chối</span>
+                                        break;
+                                    case 4:
+                                        <span class="badge bg-info">Đã hoàn thành</span>
+                                        break;
+                                    case 5:
+                                        <span class="badge bg-secondary">Đã hủy</span>
+                                        break;
+                                    default:
+                                        <span class="badge bg-dark">@item.Status</span>
+                                        break;
+                                }
+                            </td>
+                            <td>@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                <div class="btn-group">
+                                    <a asp-action="Details" asp-route-id="@item.BookingId" class="btn btn-sm btn-info">
+                                        <i class="fas fa-info-circle"></i> Chi tiết
+                                    </a>
+                                    @if (item.Status == 1) // Chỉ hiển thị nút duyệt/từ chối cho các yêu cầu đang chờ duyệt
+                                    {
+                                        <a asp-action="Approve" asp-route-id="@item.BookingId" class="btn btn-sm btn-success">
+                                            <i class="fas fa-check"></i> Duyệt
+                                        </a>
+                                        <a asp-action="Reject" asp-route-id="@item.BookingId" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-times"></i> Từ chối
+                                        </a>
+                                    }
+                                    @if (item.Status == 2) // Chỉ hiển thị nút hoàn thành cho các yêu cầu đã duyệt
+                                    {
+                                        <a asp-action="Complete" asp-route-id="@item.BookingId" class="btn btn-sm btn-info">
+                                            <i class="fas fa-check-circle"></i> Hoàn thành
+                                        </a>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#bookingsTable').DataTable({
+                responsive: true,
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.10.25/i18n/Vietnamese.json'
+                },
+                "order": [[6, "desc"]] // Sắp xếp theo cột ngày tạo, mới nhất lên đầu
+            });
+        });
+    </script>
+}

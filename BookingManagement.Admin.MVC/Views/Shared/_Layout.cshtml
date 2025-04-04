@@ -262,6 +262,7 @@
                 <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "Booking" ? "active" : "")" asp-controller="Booking" asp-action="Index">
                     <i class="bi bi-calendar-check-fill sidebar-icon"></i>
                     <span class="nav-text">Quản lý đặt phòng</span>
+                    @await Component.InvokeAsync("PendingBookingsCount")
                 </a>
             </li>
             <li class="nav-item">
