@@ -39,8 +39,16 @@ namespace BookingManagement.User.Razor.Pages.RoomList
         {
             try
             {
-                var roomTypes = _roomService.GetRoomTypeList()
+                // Lấy danh sách các loại phòng từ Service theo đúng cách admin làm
+                var existingRoomTypes = await _roomService.GetRoomTypesAsync();
+                
+                // Kết hợp với danh sách loại phòng mặc định
+                var roomTypes = existingRoomTypes
+                    .Union(BookingManagement.Services.Extensions.RoomExtensions.GetDefaultRoomTypes())
+                    .Distinct()
+                    .OrderBy(t => t)
                     .Select(rt => new SelectListItem { Text = rt, Value = rt });
+                    
                 RoomTypeList = new SelectList(roomTypes, "Value", "Text");
 
                 var result = await _roomService.GetRoomsWithFilterAsync(

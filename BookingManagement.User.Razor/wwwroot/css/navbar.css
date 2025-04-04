@@ -1,0 +1,217 @@
+/* Styles for the modern navbar */
+.navbar-custom {
+    background-color: #ffffff;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+    padding: 15px 0;
+    transition: all 0.3s ease;
+}
+
+.navbar-brand-custom {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: #3498db !important;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-brand-custom img {
+    height: 32px;
+    margin-right: 10px;
+}
+
+.nav-link-custom {
+    font-weight: 500;
+    padding: 8px 16px !important;
+    color: #2c3e50 !important;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.nav-link-custom:hover {
+    color: #3498db !important;
+    background-color: rgba(52, 152, 219, 0.05);
+    transform: translateY(-2px);
+}
+
+.nav-link-custom.active {
+    color: #3498db !important;
+    background-color: rgba(52, 152, 219, 0.1);
+}
+
+.nav-link-custom.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 16px;
+    right: 16px;
+    height: 2px;
+    background-color: #3498db;
+    border-radius: 2px;
+}
+
+.navbar-toggler-custom {
+    border: none;
+    padding: 0;
+}
+
+.navbar-toggler-custom:focus {
+    box-shadow: none;
+}
+
+.notification-badge {
+    position: absolute;
+    top: 0px;
+    right: 5px;
+    font-size: 0.6rem;
+    padding: 3px 6px;
+    border-radius: 50%;
+    background-color: #e74c3c;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.nav-item-notification {
+    position: relative;
+}
+
+.btn-login {
+    background-color: transparent;
+    color: #3498db;
+    border: 1px solid #3498db;
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-login:hover {
+    background-color: #3498db;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.2);
+}
+
+.btn-register {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-register:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(41, 128, 185, 0.3);
+}
+
+.user-profile-menu {
+    position: relative;
+}
+
+.user-profile-toggle {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+}
+
+.user-profile-toggle:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #3498db;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+.user-name {
+    margin-right: 8px;
+    font-weight: 500;
+}
+
+.dropdown-menu-custom {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+    padding: 10px 0;
+}
+
+.dropdown-item-custom {
+    padding: 8px 20px;
+    color: #2c3e50;
+    transition: all 0.3s ease;
+}
+
+.dropdown-item-custom:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+    color: #3498db;
+}
+
+.dropdown-item-custom i {
+    margin-right: 10px;
+    color: #7f8c8d;
+}
+
+.dropdown-divider-custom {
+    margin: 5px 0;
+    border-top: 1px solid #ecf0f1;
+}
+
+.dropdown-item-logout {
+    color: #e74c3c;
+}
+
+.dropdown-item-logout:hover {
+    background-color: rgba(231, 76, 60, 0.1);
+    color: #e74c3c;
+}
+
+.dropdown-item-logout i {
+    color: #e74c3c;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991px) {
+    .navbar-collapse {
+        margin-top: 15px;
+        padding: 10px;
+        border-radius: 12px;
+        background-color: #f8f9fa;
+    }
+    
+    .nav-link-custom {
+        padding: 10px 15px !important;
+    }
+    
+    .nav-link-custom.active::after {
+        display: none;
+    }
+    
+    .navbar-nav {
+        padding: 10px 0;
+    }
+    
+    .navbar-buttons {
+        margin-top: 10px;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .navbar-buttons .btn {
+        margin: 5px 0;
+    }
+}

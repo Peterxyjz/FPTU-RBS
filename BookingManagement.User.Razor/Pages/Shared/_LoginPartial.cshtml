@@ -1,31 +1,64 @@
 @using System.Security.Claims
 
-<ul class="navbar-nav ms-auto">
-    @if (User.Identity?.IsAuthenticated == true)
-    {
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                @User.FindFirstValue(ClaimTypes.Name)
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                <li><a class="dropdown-item" asp-page="/User/Profile">Thông tin cá nhân</a></li>
-                <li><a class="dropdown-item" asp-page="/User/ChangePassword">Đổi mật khẩu</a></li>
-                <li><hr class="dropdown-divider"></li>
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <div class="user-profile-menu">
+        <div class="dropdown">
+            <div class="user-profile-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <div class="user-avatar">
+                    @{
+                        var userName = User.FindFirstValue(ClaimTypes.Name);
+                        if (!string.IsNullOrEmpty(userName) && userName.Length > 0)
+                        {
+                            @userName[0]
+                        }
+                        else
+                        {
+                            <i class="bi bi-person-fill"></i>
+                        }
+                    }
+                </div>
+                <span class="user-name d-none d-md-inline">@User.FindFirstValue(ClaimTypes.Name)</span>
+                <i class="bi bi-chevron-down"></i>
+            </div>
+            <ul class="dropdown-menu dropdown-menu-custom dropdown-menu-end" aria-labelledby="userDropdown">
+                <li>
+                    <a class="dropdown-item dropdown-item-custom" asp-page="/User/Profile">
+                        <i class="bi bi-person-circle"></i> Thông tin cá nhân
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item dropdown-item-custom" asp-page="/User/ChangePassword">
+                        <i class="bi bi-key"></i> Đổi mật khẩu
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item dropdown-item-custom" asp-page="/BookingRoom/Index">
+                        <i class="bi bi-calendar-check"></i> Lịch đặt phòng
+                    </a>
+                </li>
+                <li>
+                    <hr class="dropdown-divider dropdown-divider-custom">
+                </li>
                 <li>
                     <form class="form-inline" asp-page="/Logout/Index" method="post">
-                        <button type="submit" class="dropdown-item">Đăng xuất</button>
+                        <button type="submit" class="dropdown-item dropdown-item-custom dropdown-item-logout">
+                            <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                        </button>
                     </form>
                 </li>
             </ul>
-        </li>
-    }
-    else
-    {
-        <li class="nav-item">
-            <a class="nav-link" asp-page="/Login/Index">Đăng nhập</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" asp-page="/Register/Index">Đăng ký</a>
-        </li>
-    }
-</ul>
+        </div>
+    </div>
+}
+else
+{
+    <div class="navbar-buttons d-flex">
+        <a class="btn btn-login me-2" asp-page="/Login/Index">
+            <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập
+        </a>
+        <a class="btn btn-register" asp-page="/Register/Index">
+            <i class="bi bi-person-plus me-1"></i> Đăng ký
+        </a>
+    </div>
+}
