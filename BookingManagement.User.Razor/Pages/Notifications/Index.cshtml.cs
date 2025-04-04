@@ -8,7 +8,6 @@ using BookingManagement.Repositories.Models;
 using BookingManagement.Services.Interfaces;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-using BookingManagement.Repositories.Models;
 
 namespace BookingManagement.User.Razor.Pages.Notifications
 {
@@ -37,6 +36,18 @@ namespace BookingManagement.User.Razor.Pages.Notifications
 
             Notifications = await _notificationService.GetNotificationsByUserIdAsync(userId);
             return Page();
+        }
+
+        public async Task<JsonResult> OnGetUnreadCountAsync()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                return new JsonResult(0);
+            }
+
+            var count = await _notificationService.GetUnreadCountAsync(userId);
+            return new JsonResult(count);
         }
 
         public async Task<IActionResult> OnGetMarkAllAsReadAsync()

@@ -1,6 +1,7 @@
 using BookingManagement.Services.Interfaces;
 using BookingManagement.Services.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BookingManagement.Services.Extensions
 {
@@ -20,6 +21,9 @@ namespace BookingManagement.Services.Extensions
             services.AddScoped<IOperationalHoursService, OperationalHoursService>();
             services.AddScoped<ISpecialScheduleService, SpecialScheduleService>();
             services.AddScoped<IBlockedTimeSlotService, BlockedTimeSlotService>();
+            
+            // Add SignalR service
+            services.AddScoped<ISignalRService, SignalRService>();
             
             return services;
         }

@@ -11,6 +11,14 @@
         <li class="breadcrumb-item active">Quản lý đặt phòng</li>
     </ol>
 
+    @if (ViewBag.HasNewBookings == true)
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <strong>Có @ViewBag.NewBookingsCount yêu cầu đặt phòng mới!</strong> Hãy xem xét và phê duyệt.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -94,7 +102,8 @@
                 <tbody>
                     @foreach (var item in Model)
                     {
-                        <tr>
+                        var isNewBooking = item.Status == 1 && item.CreatedAt > DateTime.Now.AddMinutes(-5);
+                        <tr class="@(isNewBooking ? "new-booking-highlight" : "")">
                             <td>@item.BookingId</td>
                             <td>@item.User.FullName</td>
                             <td>@item.Room.RoomName</td>
@@ -153,6 +162,14 @@
         </div>
     </div>
 </div>
+
+@section Styles {
+    <style>
+        .new-booking-highlight {
+            animation: highlight 2s infinite;
+        }
+    </style>
+}
 
 @section Scripts {
     <script>

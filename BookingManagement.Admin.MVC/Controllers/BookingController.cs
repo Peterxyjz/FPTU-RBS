@@ -4,6 +4,8 @@ using BookingManagement.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.SignalR;
+using BookingManagement.Admin.MVC.Hubs;
 using System.Data;
 
 namespace BookingManagement.Admin.MVC.Controllers
@@ -16,19 +18,23 @@ namespace BookingManagement.Admin.MVC.Controllers
         private readonly IUserService _userService;
         private readonly ITimeSlotService _timeSlotService;
         private readonly INotificationService _notificationService;
+        private readonly IHubContext<BookingHub> _hubContext;
+        private static DateTime _lastCheckTime = DateTime.Now;
 
         public BookingController(
             IBookingService bookingService,
             IRoomService roomService,
             IUserService userService,
             ITimeSlotService timeSlotService,
-            INotificationService notificationService)
+            INotificationService notificationService,
+            IHubContext<BookingHub> hubContext)
         {
             _bookingService = bookingService;
             _roomService = roomService;
             _userService = userService;
             _timeSlotService = timeSlotService;
             _notificationService = notificationService;
+            _hubContext = hubContext;
         }
 
         // GET: Booking
@@ -69,8 +75,34 @@ namespace BookingManagement.Admin.MVC.Controllers
             ViewBag.CurrentSearch = searchString;
             ViewBag.CurrentDate = dateFilter;
             ViewBag.TodayDate = DateOnly.FromDateTime(DateTime.Today).ToString("yyyy-MM-dd");
+            
+            // Kiểm tra có booking mới nào từ lần cuối truy cập trang không
+            var hasNewBookings = bookings.Any(b => b.Status == 1 && b.CreatedAt > _lastCheckTime);
+            if (hasNewBookings)
+            {
+                ViewBag.HasNewBookings = true;
+                ViewBag.NewBookingsCount = bookings.Count(b => b.Status == 1 && b.CreatedAt > _lastCheckTime);
+            }
+
+            // Cập nhật thời gian kiểm tra cuối cùng
+            _lastCheckTime = DateTime.Now;
 
             return View(bookings);
+        }
+
+        // API: Booking/CheckNewBookings - Kiểm tra có booking mới không
+        [HttpGet]
+        public async Task<JsonResult> CheckNewBookings()
+        {
+            var bookings = await _bookingService.GetAllAsync();
+            var hasNewBookings = bookings.Any(b => b.CreatedAt > _lastCheckTime && b.Status == 1); // 1: Chờ duyệt
+            
+            if (hasNewBookings)
+            {
+                _lastCheckTime = DateTime.Now;
+            }
+            
+            return Json(hasNewBookings);
         }
 
         // GET: Booking/Details/5
@@ -131,7 +163,7 @@ namespace BookingManagement.Admin.MVC.Controllers
             var timeSlotDto = await _timeSlotService.GetTimeSlotByIdAsync(booking.TimeSlotId);
 
             // Tạo thông báo cho người dùng
-            await _notificationService.CreateAsync(new Notification
+            var notification = new Notification
             {
                 UserId = booking.UserId,
                 Title = "Đặt phòng đã được phê duyệt",
@@ -140,7 +172,13 @@ namespace BookingManagement.Admin.MVC.Controllers
                 BookingId = booking.BookingId,
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now
-            });
+            };
+            
+            await _notificationService.CreateAsync(notification);
+            
+            // Gửi thông báo real-time cho user
+            await _hubContext.Clients.Group(booking.UserId.ToString())
+                .SendAsync("ReceiveBookingApproval", notification.Message, booking.BookingId);
 
             TempData["SuccessMessage"] = "Yêu cầu đặt phòng đã được phê duyệt thành công.";
             return RedirectToAction(nameof(Index));
@@ -193,7 +231,7 @@ namespace BookingManagement.Admin.MVC.Controllers
             var timeSlotDto = await _timeSlotService.GetTimeSlotByIdAsync(booking.TimeSlotId);
 
             // Tạo thông báo cho người dùng
-            await _notificationService.CreateAsync(new Notification
+            var notification = new Notification
             {
                 UserId = booking.UserId,
                 Title = "Đặt phòng đã bị từ chối",
@@ -202,7 +240,13 @@ namespace BookingManagement.Admin.MVC.Controllers
                 BookingId = booking.BookingId,
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now
-            });
+            };
+            
+            await _notificationService.CreateAsync(notification);
+            
+            // Gửi thông báo real-time cho user
+            await _hubContext.Clients.Group(booking.UserId.ToString())
+                .SendAsync("ReceiveBookingRejection", notification.Message, booking.BookingId);
 
             TempData["SuccessMessage"] = "Yêu cầu đặt phòng đã bị từ chối.";
             return RedirectToAction(nameof(Index));
@@ -254,7 +298,7 @@ namespace BookingManagement.Admin.MVC.Controllers
             var timeSlotDto = await _timeSlotService.GetTimeSlotByIdAsync(booking.TimeSlotId);
 
             // Tạo thông báo cho người dùng
-            await _notificationService.CreateAsync(new Notification
+            var notification = new Notification
             {
                 UserId = booking.UserId,
                 Title = "Đặt phòng đã hoàn thành",
@@ -263,7 +307,13 @@ namespace BookingManagement.Admin.MVC.Controllers
                 BookingId = booking.BookingId,
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now
-            });
+            };
+            
+            await _notificationService.CreateAsync(notification);
+            
+            // Gửi thông báo real-time cho user
+            await _hubContext.Clients.Group(booking.UserId.ToString())
+                .SendAsync("ReceiveBookingCompletion", notification.Message, booking.BookingId);
 
             TempData["SuccessMessage"] = "Yêu cầu đặt phòng đã được đánh dấu hoàn thành.";
             return RedirectToAction(nameof(Index));

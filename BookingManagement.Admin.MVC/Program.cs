@@ -5,6 +5,8 @@ using BookingManagement.Services.Interfaces;
 using BookingManagement.Services.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.FileProviders;
+using BookingManagement.Admin.MVC.Hubs;
+using BookingManagement.Admin.MVC.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +19,9 @@ builder.Services.AddRepositories(builder.Configuration);
 // Đăng ký các services
 // Add all application services
 builder.Services.AddApplicationServices();
+
+// Đăng ký AdminSignalRService để làm việc với BookingHub
+builder.Services.AddScoped<ISignalRService, AdminSignalRService>();
 
 // Đăng ký SignalR
 builder.Services.AddSignalR();
@@ -68,5 +73,8 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Login}/{action=Index}/{id?}");
+    
+// Map SignalR hub
+app.MapHub<BookingHub>("/bookingHub");
 
 app.Run();

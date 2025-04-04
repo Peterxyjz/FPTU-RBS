@@ -3,6 +3,7 @@ using BookingManagement.Services.Interfaces;
 using BookingManagement.Services.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.FileProviders;
+using BookingManagement.User.Razor.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,12 @@ builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<ITimeSlotService, TimeSlotService>();
 builder.Services.AddScoped<IRoomService, RoomService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+
+// Đăng ký SignalR
+builder.Services.AddSignalR();
+
+// Đăng ký IHubContext cho SignalRService
+builder.Services.AddTransient<BookingManagement.Services.Services.DummyHub>();
 // Cấu hình Authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -62,5 +69,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorPages();
+
+// Map SignalR hub
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.Run();

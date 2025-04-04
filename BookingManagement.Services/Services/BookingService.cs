@@ -3,6 +3,7 @@ using BookingManagement.Repositories.Interfaces;
 using BookingManagement.Repositories.Models;
 using BookingManagement.Repositories.UnitOfWork;
 using BookingManagement.Services.Interfaces;
+using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,10 +15,12 @@ namespace BookingManagement.Services.Services
     public class BookingService : IBookingService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ISignalRService _signalRService;
 
-        public BookingService(IUnitOfWork unitOfWork)
+        public BookingService(IUnitOfWork unitOfWork, ISignalRService signalRService = null)
         {
             _unitOfWork = unitOfWork;
+            _signalRService = signalRService;
         }
 
         public async Task<IEnumerable<Booking>> GetAllAsync()
@@ -109,6 +112,12 @@ namespace BookingManagement.Services.Services
 
                 await _unitOfWork.Notifications.AddAsync(notification);
                 await _unitOfWork.CompleteAsync();
+                
+                // Gửi thông báo real-time đến Admin nếu SignalRService được cung cấp
+                if (_signalRService != null)
+                {
+                    await _signalRService.SendNewBookingNotificationAsync(booking);
+                }
 
                 return booking;
             }
@@ -207,43 +216,16 @@ namespace BookingManagement.Services.Services
                     UpdatedAt = DateTime.Now
                 };
 
-                //string title;
-                //string message;
-
-                //// Xác định nội dung thông báo dựa trên loại thay đổi
-                //if (oldStatus != booking.Status)
-                //{
-                //    title = GetStatusChangeTitle(booking.Status);
-                //    message = GetStatusChangeMessage(booking.Status, room.RoomName, booking.BookingDate, timeSlot);
-                //}
-                //else if (oldBookingDate != booking.BookingDate || oldTimeSlotId != booking.TimeSlotId)
-                //{
-                //    title = "Đặt phòng đã được cập nhật";
-                //    message = $"Đặt phòng của bạn cho phòng {room.RoomName} đã được thay đổi thành ngày {booking.BookingDate.ToString("dd/MM/yyyy")}, khung giờ {timeSlot.StartTime}-{timeSlot.EndTime}.";
-                //}
-                //else
-                //{
-                //    // Luôn tạo thông báo khi có bất kỳ cập nhật nào
-                //    title = "Đặt phòng đã được cập nhật";
-                //    message = $"Đặt phòng của bạn cho phòng {room.RoomName} đã được cập nhật thành công.";
-                //}
-
-                //// Tạo thông báo
-                //var notification = new Notification
-                //{
-                //    UserId = booking.UserId,
-                //    Title = title,
-                //    Message = message,
-                //    IsRead = false,
-                //    BookingId = booking.BookingId,
-                //    CreatedAt = DateTime.Now,
-                //    UpdatedAt = DateTime.Now
-                //};
-
                 await _unitOfWork.Notifications.AddAsync(notification);
 
                 // Commit tất cả các thay đổi trong một transaction
                 await _unitOfWork.CompleteAsync();
+                
+                // Gửi thông báo real-time
+                if (_signalRService != null)
+                {
+                    await _signalRService.SendBookingStatusUpdateAsync(booking, notification.Message);
+                }
             }
             catch (Exception ex)
             {
@@ -327,6 +309,12 @@ namespace BookingManagement.Services.Services
 
                 await _unitOfWork.Notifications.AddAsync(notification);
                 await _unitOfWork.CompleteAsync();
+                
+                // Gửi thông báo real-time nếu có SignalR service
+                if (_signalRService != null)
+                {
+                    await _signalRService.SendBookingStatusUpdateAsync(booking, notification.Message);
+                }
             }
             catch (Exception)
             {
