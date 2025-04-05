@@ -18,62 +18,270 @@
     </div>
 }
 
-<h1>Lịch của tôi</h1>
+<div class="booking-list-container">
+    <h4 class="booking-list-header">Lịch đặt phòng của tôi</h4>
+    
+    <div class="booking-filters">
+        <div class="booking-search">
+            <i class="bi bi-search"></i>
+            <input type="text" id="bookingSearch" placeholder="Tìm kiếm phòng..." />
+        </div>
+        
+        <div class="booking-status-filters">
+            <button class="status-filter active" data-filter="all">Tất cả</button>
+            <button class="status-filter" data-filter="pending">Chờ duyệt</button>
+            <button class="status-filter" data-filter="approved">Đã duyệt</button>
+            <button class="status-filter" data-filter="completed">Đã hoàn thành</button>
+            <button class="status-filter" data-filter="rejected">Từ chối</button>
+        </div>
+    </div>
+    
+    <div class="booking-view-toggle">
+        <button class="view-toggle-btn" id="cardViewBtn"><i class="bi bi-grid-3x3-gap"></i> Card View</button>
+        <button class="view-toggle-btn active" id="tableViewBtn"><i class="bi bi-table"></i> Table View</button>
+    </div>
+    
+    <div id="cardView" style="display: none;">
+        @if (Model.Booking.Count > 0)
+        {
+            <div class="booking-cards">
+                @foreach (var item in Model.Booking)
+                {
+                    <div class="booking-card" data-status="@Model.GetStatusClass(item.Status)">
+                        <div class="booking-card-header">
+                            <div>Phòng @item.Room.RoomName</div>
+                            <span class="booking-status @Model.GetStatusClass(item.Status)">@Model.GetStatusText(item.Status)</span>
+                        </div>
+                        <div class="booking-card-body">
+                            <div class="booking-info">
+                                <div class="booking-info-item">
+                                    <div class="booking-info-label"><i class="bi bi-calendar"></i> Ngày:</div>
+                                    <div class="booking-info-value">@item.BookingDate.ToString("dd/MM/yyyy")</div>
+                                </div>
+                                <div class="booking-info-item">
+                                    <div class="booking-info-label"><i class="bi bi-clock"></i> Giờ:</div>
+                                    <div class="booking-info-value">@item.TimeSlot.StartTime.ToString("HH:mm") - @item.TimeSlot.EndTime.ToString("HH:mm")</div>
+                                </div>
+                                <div class="booking-info-item">
+                                    <div class="booking-info-label"><i class="bi bi-building"></i> Phòng:</div>
+                                    <div class="booking-info-value">@item.Room.RoomName (@item.Room.Building)</div>
+                                </div>
+                                <div class="booking-info-item">
+                                    <div class="booking-info-label"><i class="bi bi-people"></i> Sức chứa:</div>
+                                    <div class="booking-info-value">@item.Room.Capacity người</div>
+                                </div>
+                                @if (item.Status == 3 && !string.IsNullOrEmpty(item.RejectReason))
+                                {
+                                    <div class="booking-info-item">
+                                        <div class="booking-info-label"><i class="bi bi-exclamation-circle"></i> Lý do:</div>
+                                        <div class="booking-info-value">@item.RejectReason</div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="booking-card-actions">
+                                <a asp-page="./Details" asp-route-id="@item.BookingId" class="booking-action-btn view">
+                                    <i class="bi bi-eye"></i> Chi tiết
+                                </a>
+                                @if (item.Status == 1) // Pending
+                                {
+                                    <a asp-page="./Edit" asp-route-id="@item.BookingId" class="booking-action-btn edit">
+                                        <i class="bi bi-pencil"></i> Sửa
+                                    </a>
+                                    <a asp-page="./Delete" asp-route-id="@item.BookingId" class="booking-action-btn cancel">
+                                        <i class="bi bi-x-circle"></i> Hủy
+                                    </a>
+                                }
+                                @if (item.Status == 2) // Approved
+                                {
+                                    <a asp-page="./Delete" asp-route-id="@item.BookingId" class="booking-action-btn cancel">
+                                        <i class="bi bi-x-circle"></i> Hủy
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="booking-empty-state">
+                <i class="bi bi-calendar-x"></i>
+                <h4>Bạn chưa có lịch đặt phòng nào</h4>
+                <p>Hãy tìm kiếm phòng phù hợp và đặt lịch để sử dụng không gian học tập và làm việc tại trường.</p>
+                <a href="/RoomList/Index" class="btn">
+                    <i class="bi bi-building"></i> Xem danh sách phòng
+                </a>
+            </div>
+        }
+    </div>
+    
+    <div id="tableView">
+        @if (Model.Booking.Count > 0)
+        {
+            <table class="booking-table">
+                <thead>
+                    <tr>
+                        <th>Phòng</th>
+                        <th>Ngày</th>
+                        <th>Giờ</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Booking)
+                    {
+                        <tr data-status="@Model.GetStatusClass(item.Status)">
+                            <td>
+                                <strong>@item.Room.RoomName</strong>
+                                <div class="text-muted small">@item.Room.Building</div>
+                            </td>
+                            <td>@item.BookingDate.ToString("dd/MM/yyyy")</td>
+                            <td>@item.TimeSlot.StartTime.ToString("HH:mm") - @item.TimeSlot.EndTime.ToString("HH:mm")</td>
+                            <td>
+                                <span class="booking-status-badge @Model.GetStatusClass(item.Status)">
+                                    @Model.GetStatusText(item.Status)
+                                </span>
+                            </td>
+                            <td class="table-actions">
+                                <a asp-page="./Details" asp-route-id="@item.BookingId" class="table-action-btn view">
+                                    <i class="bi bi-eye"></i> Chi tiết
+                                </a>
+                                @if (item.Status == 1) // Pending
+                                {
+                                    <a asp-page="./Edit" asp-route-id="@item.BookingId" class="table-action-btn edit">
+                                        <i class="bi bi-pencil"></i> Sửa
+                                    </a>
+                                    <a asp-page="./Delete" asp-route-id="@item.BookingId" class="table-action-btn cancel">
+                                        <i class="bi bi-x-circle"></i> Hủy
+                                    </a>
+                                }
+                                @if (item.Status == 2) // Approved
+                                {
+                                    <a asp-page="./Delete" asp-route-id="@item.BookingId" class="table-action-btn cancel">
+                                        <i class="bi bi-x-circle"></i> Hủy
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="booking-empty-state">
+                <i class="bi bi-calendar-x"></i>
+                <h4>Bạn chưa có lịch đặt phòng nào</h4>
+                <p>Hãy tìm kiếm phòng phù hợp và đặt lịch để sử dụng không gian học tập và làm việc tại trường.</p>
+                <a href="/RoomList/Index" class="btn">
+                    <i class="bi bi-building"></i> Xem danh sách phòng
+                </a>
+            </div>
+        }
+    </div>
+</div>
 
-<table class="table">
-    <thead>
-        <tr class="text-center">
-            <th>
-                @Html.DisplayNameFor(model => model.Booking[0].User)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Booking[0].Room)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Booking[0].TimeSlot)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Booking[0].BookingDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Booking[0].Status)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model.Booking) {
-            <tr class="text-center">
-            <td>
-                    @Html.DisplayFor(modelItem => item.User.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Room.RoomName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TimeSlot.TimeSlotId)
-            </td>
-            <td>
-                    @Html.DisplayFor(modelItem => item.BookingDate)
-            </td>
-            @* <td> *@
-            @*         @Html.DisplayFor(modelItem => item.RejectReason) *@
-            @* </td> *@
-            @* <td> *@
-            @*         @Html.DisplayFor(modelItem => item.IsRecurring) *@
-            @* </td> *@
-            @* <td> *@
-            @*         @Html.DisplayFor(modelItem => item.EndRecurringDate) *@
-            @* </td> *@
-            <td>
-                @Model.GetStatusText(item.Status)
-            </td>
-            <td>
-                <a asp-page="./Edit" asp-route-id="@item.BookingId">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.BookingId">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.BookingId">Cancel</a>
-            </td>
-        </tr>
+@section Scripts {
+    <script>
+        // View toggle functionality
+        const cardViewBtn = document.getElementById('cardViewBtn');
+        const tableViewBtn = document.getElementById('tableViewBtn');
+        const cardView = document.getElementById('cardView');
+        const tableView = document.getElementById('tableView');
+        
+        cardViewBtn.addEventListener('click', function() {
+            cardView.style.display = 'block';
+            tableView.style.display = 'none';
+            cardViewBtn.classList.add('active');
+            tableViewBtn.classList.remove('active');
+            
+            // Save preference in localStorage
+            localStorage.setItem('bookingViewPreference', 'card');
+        });
+        
+        tableViewBtn.addEventListener('click', function() {
+            cardView.style.display = 'none';
+            tableView.style.display = 'block';
+            tableViewBtn.classList.add('active');
+            cardViewBtn.classList.remove('active');
+            
+            // Save preference in localStorage
+            localStorage.setItem('bookingViewPreference', 'table');
+        });
+        
+        // Load saved preference
+        document.addEventListener('DOMContentLoaded', function() {
+            const viewPreference = localStorage.getItem('bookingViewPreference');
+            if (viewPreference === 'card') {
+                cardViewBtn.click();
+            }
+        });
+        
+        // Status filtering functionality
+        const statusFilters = document.querySelectorAll('.status-filter');
+        const bookingCards = document.querySelectorAll('.booking-card');
+        const bookingRows = document.querySelectorAll('.booking-table tbody tr');
+        const searchInput = document.getElementById('bookingSearch');
+        
+        statusFilters.forEach(filter => {
+            filter.addEventListener('click', function() {
+                // Remove active class from all filters
+                statusFilters.forEach(f => f.classList.remove('active'));
+                
+                // Add active class to clicked filter
+                filter.classList.add('active');
+                
+                const filterValue = filter.getAttribute('data-filter');
+                
+                // Filter card view
+                bookingCards.forEach(card => {
+                    if (filterValue === 'all' || card.getAttribute('data-status') === filterValue) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+                
+                // Filter table view
+                bookingRows.forEach(row => {
+                    if (filterValue === 'all' || row.getAttribute('data-status') === filterValue) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        });
+        
+        // Search functionality
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            
+            // Search in card view
+            bookingCards.forEach(card => {
+                const roomName = card.querySelector('.booking-card-header div').textContent.toLowerCase();
+                const building = card.querySelector('.booking-info-value:nth-child(6)')?.textContent.toLowerCase() || '';
+                
+                if (roomName.includes(searchTerm) || building.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Search in table view
+            bookingRows.forEach(row => {
+                const roomName = row.querySelector('td:first-child strong').textContent.toLowerCase();
+                const building = row.querySelector('td:first-child .text-muted').textContent.toLowerCase();
+                
+                if (roomName.includes(searchTerm) || building.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
 }
-    </tbody>
-</table>

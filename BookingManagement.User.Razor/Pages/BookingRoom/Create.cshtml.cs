@@ -10,6 +10,7 @@ using System.Security.Claims;
 using BookingManagement.Services.Interfaces;
 using System.Data;
 using Microsoft.AspNetCore.Authorization;
+using BookingManagement.Services.DTOs;
 
 namespace BookingManagement.User.Razor.Pages.BookingRoom
 {
@@ -18,12 +19,14 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
     {
         private readonly IBookingService _bookingService;
         private readonly ITimeSlotService _timeSlotService;
+        private readonly IRoomService _roomService;
         private readonly ILogger<CreateModel> _logger;
 
-        public CreateModel(IBookingService bookingService, ITimeSlotService timeSlotService, ILogger<CreateModel> logger)
+        public CreateModel(IBookingService bookingService, ITimeSlotService timeSlotService, IRoomService roomService, ILogger<CreateModel> logger)
         {
             _bookingService = bookingService;
             _timeSlotService = timeSlotService;
+            _roomService = roomService;
             _logger = logger;
         }
 
@@ -63,6 +66,9 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
 
             Booking.RoomId = id.Value;
             Booking.BookingDate = DateOnly.FromDateTime(DateTime.Now);
+            
+            // Get room information for the sidebar
+            RoomInfo = await _roomService.GetByIdAsync(id.Value);
 
             // Lấy danh sách tất cả time slot
             var allTimeSlots = await _timeSlotService.GetActiveTimeSlotsAsync();
@@ -112,6 +118,8 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
 
         [BindProperty]
         public Booking Booking { get; set; } = default!;
+        
+        public Room RoomInfo { get; set; } = default!;
 
         // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()

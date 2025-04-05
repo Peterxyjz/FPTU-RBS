@@ -5,41 +5,90 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Create</h1>
-
-<h4>Booking</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="UserName" class="control-label">UserName</label>
-                <input asp-for="Booking.UserId" type="hidden" />
-                <input asp-for="UserName" class="form-control" readonly />
-            </div>
-            <div class="form-group">
-                <label asp-for="Booking.RoomId" class="control-label"></label>
-                <input asp-for="Booking.RoomId" class="form-control" readonly />
-            </div>
-            <div class="form-group">
-                <label asp-for="Booking.BookingDate" class="control-label"></label>
-                <input asp-for="Booking.BookingDate" class="form-control" type="date" id="bookingDate" />
-                <span asp-validation-for="Booking.BookingDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Booking.TimeSlotId" class="control-label"></label>
-                <select asp-for="Booking.TimeSlotId" class="form-control" id="timeSlotId" asp-items="ViewBag.TimeSlotId"></select>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+<div class="booking-container">
+    <h4 class="booking-header">Đặt phòng</h4>
+    
+    <div class="booking-alert alert-info">
+        <i class="bi bi-info-circle"></i>
+        <div>Vui lòng chọn ngày và khung giờ bạn muốn đặt phòng. Lưu ý mỗi người chỉ được đặt tối đa 3 phòng cùng lúc.</div>
     </div>
-</div>
-
-<div>
-    <a asp-page="/RoomList/Details" asp-route-id="@Model.Booking.RoomId">Back to Detail</a>
+    
+    <div class="row">
+        <div class="col-md-7 booking-form-col">
+            <form method="post" class="booking-form">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                
+                <div class="form-group">
+                    <label><i class="bi bi-person"></i> Người đặt</label>
+                    <input asp-for="Booking.UserId" type="hidden" />
+                    <input asp-for="UserName" class="form-control" readonly />
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="bi bi-building"></i> Mã phòng</label>
+                    <input asp-for="Booking.RoomId" class="form-control" readonly />
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="bi bi-calendar-date"></i> Ngày đặt</label>
+                    <input asp-for="Booking.BookingDate" class="form-control" type="date" id="bookingDate" min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    <span asp-validation-for="Booking.BookingDate" class="text-danger"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="bi bi-clock"></i> Khung giờ</label>
+                    <select asp-for="Booking.TimeSlotId" class="form-control" id="timeSlotId" asp-items="ViewBag.TimeSlotId"></select>
+                    <span id="noTimeSlotsMessage" class="text-danger" style="display: none;">Không có khung giờ nào khả dụng cho ngày này.</span>
+                </div>
+                
+                <div class="form-group mb-0">
+                    <button type="submit" class="booking-submit-btn">
+                        <i class="bi bi-calendar-check"></i> Xác nhận đặt phòng
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="col-md-5 booking-info-col">
+            <div class="room-summary">
+                <h5><i class="bi bi-info-circle"></i> Thông tin phòng</h5>
+                <div class="room-summary-details">
+                    <div class="room-summary-item">
+                        <i class="bi bi-building"></i> Phòng @Model.Booking.RoomId
+                    </div>
+                    @if (Model.RoomInfo != null)
+                    {
+                        <div class="room-summary-item">
+                            <i class="bi bi-people"></i> @Model.RoomInfo.Capacity người
+                        </div>
+                        <div class="room-summary-item">
+                            <i class="bi bi-tag"></i> @Model.RoomInfo.RoomType
+                        </div>
+                        <div class="room-summary-item">
+                            <i class="bi bi-geo-alt"></i> @Model.RoomInfo.Building
+                        </div>
+                    }
+                </div>
+            </div>
+            
+            <div class="booking-policy">
+                <h5><i class="bi bi-exclamation-triangle"></i> Lưu ý khi đặt phòng</h5>
+                <ul class="booking-policy-list">
+                    <li>Mỗi người chỉ được đặt tối đa 3 phòng cùng lúc</li>
+                    <li>Bạn có thể hủy đặt phòng trước 24 giờ</li>
+                    <li>Vui lòng sử dụng phòng đúng mục đích đã đăng ký</li>
+                    <li>Đặt phòng sẽ được quản lý duyệt trong thời gian sớm nhất</li>
+                    <li>Kiểm tra thông báo để biết trạng thái đặt phòng của bạn</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="booking-actions">
+        <a asp-page="/RoomList/Details" asp-route-id="@Model.Booking.RoomId" class="booking-back-link">
+            <i class="bi bi-arrow-left"></i> Quay lại chi tiết phòng
+        </a>
+    </div>
 </div>
 
 @section Scripts {

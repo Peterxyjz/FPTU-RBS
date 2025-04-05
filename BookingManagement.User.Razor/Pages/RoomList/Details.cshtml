@@ -6,62 +6,60 @@
 
 <div class="room-details-container">
     <h4 class="room-details-header">Room Details</h4>
-    <hr />
+    
     <div class="room-details">
-        <dl class="row">
-            <dt class="col-sm-3">
-                Hình ảnh
-            </dt>
-            <dd class="col-sm-9">
+        <div class="room-details-image">
+            <div style="width: 100%; max-width: 450px;">
                 @if (!string.IsNullOrEmpty(Model.Room.ImageUrl))
                 {
-                    <img src="@Model.GetDirectImageUrl(Model.Room.ImageUrl)" alt="Room Image" class="room-image" style="max-width: 400px; max-height: 300px; margin: 0 0 0 0;" />
+                    <img src="@Model.GetDirectImageUrl(Model.Room.ImageUrl)" alt="Room Image" class="room-image" />
                 }
                 else
                 {
-                    <div class="no-image">No image available</div>
+                    <div class="no-image"><i class="bi bi-image me-2"></i>No image available</div>
                 }
-            </dd>
-            <dt class="col-sm-3">
-                @Html.DisplayNameFor(model => model.Room.RoomName)
-            </dt>
-            <dd class="col-sm-9">
-                @Html.DisplayFor(model => model.Room.RoomName)
-            </dd>
-            <dt class="col-sm-3">
-                @Html.DisplayNameFor(model => model.Room.Capacity)
-            </dt>
-            <dd class="col-sm-9">
-                @Html.DisplayFor(model => model.Room.Capacity) people
-            </dd>
-            <dt class="col-sm-3">
-                @Html.DisplayNameFor(model => model.Room.RoomType)
-            </dt>
-            <dd class="col-sm-9">
-                @Html.DisplayFor(model => model.Room.RoomType)
-            </dd>
-            <dt class="col-sm-3">
-                @Html.DisplayNameFor(model => model.Room.Building)
-            </dt>
-            <dd class="col-sm-9">
-                @Html.DisplayFor(model => model.Room.Building)
-            </dd>
-            <dt class="col-sm-3">
-                @Html.DisplayNameFor(model => model.Room.Description)
-            </dt>
-            <dd class="col-sm-9 room-description">
-                @Html.DisplayFor(model => model.Room.Description)
-            </dd>
-            <dt class="col-sm-3">
-                @Html.DisplayNameFor(model => model.Room.Status)
-            </dt>
-            <dd class="col-sm-9">
-                @Model.GetStatusTextForRoomList(Model.Room.Status)
-            </dd>
-        </dl>
+            </div>
+        </div>
+        <div class="room-details-info">
+            <dl class="row">
+                <dt class="col-sm-4"><i class="bi bi-door-open"></i> @Html.DisplayNameFor(model => model.Room.RoomName)</dt>
+                <dd class="col-sm-8">@Html.DisplayFor(model => model.Room.RoomName)</dd>
+                
+                <dt class="col-sm-4"><i class="bi bi-people"></i> @Html.DisplayNameFor(model => model.Room.Capacity)</dt>
+                <dd class="col-sm-8">@Html.DisplayFor(model => model.Room.Capacity) người</dd>
+                
+                <dt class="col-sm-4"><i class="bi bi-tag"></i> @Html.DisplayNameFor(model => model.Room.RoomType)</dt>
+                <dd class="col-sm-8">@Html.DisplayFor(model => model.Room.RoomType)</dd>
+                
+                <dt class="col-sm-4"><i class="bi bi-building"></i> @Html.DisplayNameFor(model => model.Room.Building)</dt>
+                <dd class="col-sm-8">@Html.DisplayFor(model => model.Room.Building)</dd>
+                
+                <dt class="col-sm-4"><i class="bi bi-check-circle"></i> Trạng thái</dt>
+                <dd class="col-sm-8">
+                    <span class="status-badge @(Model.Room.Status == 1 ? "status-active" : "status-inactive")">
+                        @Model.GetStatusTextForRoomList(Model.Room.Status)
+                    </span>
+                </dd>
+            </dl>
+            
+            @if (!string.IsNullOrEmpty(Model.Room.Description))
+            {
+                <div class="mt-3">
+                    <h5><i class="bi bi-info-circle me-2"></i>Mô tả</h5>
+                    <div class="room-description">
+                        @Html.DisplayFor(model => model.Room.Description)
+                    </div>
+                </div>
+            }
+        </div>
     </div>
+    
     <div class="action-buttons">
-        <a asp-page="/BookingRoom/Create" asp-route-id="@Model.Room.RoomId" class="btn-action btn-booking">Book This Room</a>
-        <a asp-page="./Index" class="btn-action btn-back">Back to List</a>
+        <a asp-page="/BookingRoom/Create" asp-route-id="@Model.Room.RoomId" class="btn-action btn-booking">
+            <i class="bi bi-calendar-plus"></i> Đặt phòng này
+        </a>
+        <a asp-page="./Index" class="btn-action btn-back">
+            <i class="bi bi-arrow-left"></i> Quay lại
+        </a>
     </div>
 </div>

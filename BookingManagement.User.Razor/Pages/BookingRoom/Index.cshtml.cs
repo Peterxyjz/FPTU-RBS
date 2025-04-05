@@ -46,5 +46,18 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
         {
             return _roomService.GetStatusText(status);
         }
+        
+        public string GetStatusClass(int status)
+        {
+            return status switch
+            {
+                1 => "pending", // Pending
+                2 => "approved", // Approved
+                3 => "rejected", // Rejected
+                4 => "completed", // Completed
+                5 => "cancelled", // Cancelled
+                _ => "pending"
+            };
+        }
     }
 }

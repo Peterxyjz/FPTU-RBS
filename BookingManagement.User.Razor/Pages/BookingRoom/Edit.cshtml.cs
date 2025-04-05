@@ -35,6 +35,8 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
 
         [BindProperty]
         public Booking Booking { get; set; } = default!;
+        
+        public Room RoomInfo { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -61,6 +63,8 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
             }
 
             Booking = booking;
+            // Get room information for the sidebar
+            RoomInfo = await _roomService.GetByIdAsync(booking.RoomId);
 
             var userNameClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -182,6 +186,19 @@ namespace BookingManagement.User.Razor.Pages.BookingRoom
         public string GetStatusText(int status)
         {
             return _roomService.GetStatusText(status);
+        }
+        
+        public string GetStatusClass(int status)
+        {
+            return status switch
+            {
+                1 => "pending", // Pending
+                2 => "approved", // Approved
+                3 => "rejected", // Rejected
+                4 => "completed", // Completed
+                5 => "cancelled", // Cancelled
+                _ => "pending"
+            };
         }
 
     }
